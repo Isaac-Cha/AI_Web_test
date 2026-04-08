@@ -30,7 +30,7 @@ jobs:
           script: |
             mkdir -p "${{ secrets.VPS_TARGET_DIR }}"
 
-            - name: Upload via SCP
+      - name: Upload via SCP
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VPS_HOST }}
