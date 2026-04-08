@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="zh-Hans">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Deploy Test</title>
+    <link rel="stylesheet" href="./assets/style.css" />
+  </head>
+  <body>
+    <main class="container">
+      <header class="header">
+        <h1 class="title">自动部署测试页</h1>
+        <p class="subtitle">如果你能在浏览器看到这页，说明静态文件部署已生效。</p>
+      </header>
+
+      <section class="card">
+        <h2 class="cardTitle">运行信息</h2>
+        <dl class="kv">
+          <div class="row">
+            <dt>访问域名</dt>
+            <dd id="hostname">-</dd>
+          </div>
+          <div class="row">
+            <dt>页面路径</dt>
+            <dd id="pathname">-</dd>
+          </div>
+          <div class="row">
+            <dt>客户端时间</dt>
+            <dd id="clientTime">-</dd>
+          </div>
+        </dl>
+      </section>
+
+      <section class="card">
+        <h2 class="cardTitle">探活</h2>
+        <p class="muted">此处会请求 <code>./health.txt</code>，用于验证服务器路径与缓存是否正常。</p>
+        <pre class="pre" id="health">加载中…</pre>
+      </section>
+
+      <footer class="footer">
+        <a class="link" href="./health.txt">打开 health.txt</a>
+      </footer>
+    </main>
+    <script src="./assets/app.js" defer></script>
+  </body>
+</html>
