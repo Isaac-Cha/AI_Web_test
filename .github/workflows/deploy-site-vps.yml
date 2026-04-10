@@ -21,6 +21,9 @@ concurrency:
   group: deploy-site-vps
   cancel-in-progress: true
 
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -31,8 +34,22 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 20
+          node-version: 24
           cache: npm
+
+      - name: Validate secrets
+        run: |
+          set -e
+          if [ -z "${VPS_HOST}" ] || [ -z "${VPS_USER}" ] || [ -z "${VPS_PASSWORD}" ] || [ -z "${VPS_PORT}" ] || [ -z "${VPS_SITE_TARGET_DIR}" ]; then
+            echo "Missing required secrets. Please set VPS_HOST, VPS_USER, VPS_PASSWORD, VPS_PORT, VPS_SITE_TARGET_DIR in GitHub Actions Secrets."
+            exit 1
+          fi
+        env:
+          VPS_HOST: ${{ secrets.VPS_HOST }}
+          VPS_USER: ${{ secrets.VPS_USER }}
+          VPS_PASSWORD: ${{ secrets.VPS_PASSWORD }}
+          VPS_PORT: ${{ secrets.VPS_PORT }}
+          VPS_SITE_TARGET_DIR: ${{ secrets.VPS_SITE_TARGET_DIR }}
 
       - name: Install
         run: npm ci

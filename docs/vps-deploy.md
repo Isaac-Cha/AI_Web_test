@@ -129,6 +129,8 @@ ls -la /var/www/html
 
 工作流文件：`.github/workflows/deploy-vps-ssh.yml`
 
+站点发布工作流（构建 Vite 产物并发布到站点根目录）：`.github/workflows/deploy-site-vps.yml`
+
 在 GitHub 仓库中添加 Actions Secrets：
 
 - `VPS_HOST`：服务器 IP 或域名（例如 `103.143.81.115`）
@@ -139,6 +141,13 @@ ls -la /var/www/html
   - 示例（Nginx 常见）：`/usr/share/nginx/html/deploy-test`
   - 示例（Apache 常见）：`/var/www/html/deploy-test`
   - 示例（宝塔常见）：`/www/wwwroot/你的站点目录/deploy-test`
+
+如果你要发布整个网站（React/Vite 构建产物），再新增一个 Secret：
+- `VPS_SITE_TARGET_DIR`：站点根目录（宝塔常见：`/www/wwwroot/cg-fintech.com/`）
+
+说明：
+- `deploy-vps-ssh.yml` 负责上传 `deploy-test/`（用于自动部署测试页）
+- `deploy-site-vps.yml` 负责 `npm ci && npm run build`，然后上传 `dist/` 到 `VPS_SITE_TARGET_DIR`
 
 你截图里的宝塔站点根目录分别是：
 - `cg-fintech.com`：`/www/wwwroot/cg-fintech.com`
@@ -164,6 +173,16 @@ ls -la /var/www/html
 此时做法：
 - 修改工作流上传规则（已在本仓库修复为去掉多余目录层级），或
 - 临时手动把内层 `deploy-test/` 里的文件移动到上一层目录。
+
+### 单页应用（多路由）刷新 404 的处理
+
+如果你的网站使用前端路由（例如 `/platform`、`/ea` 等），部署后首页可打开但刷新子路径出现 404，需要在宝塔 Nginx 的站点配置里加一条回退到 `index.html` 的规则：
+
+```nginx
+location / {
+  try_files $uri $uri/ /index.html;
+}
+```
 
 访问验证（示例）：
 - `http://<你的IP或域名>/deploy-test/`
