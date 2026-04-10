@@ -80,8 +80,12 @@ jobs:
           username: ${{ env.VPS_USER }}
           password: ${{ env.VPS_PASSWORD }}
           port: ${{ env.VPS_PORT }}
+          timeout: 120s
+          command_timeout: 15m
           source: "dist/**"
           strip_components: 1
           target: ${{ env.VPS_SITE_TARGET_DIR }}
-          rm: true
+          overwrite: true
+          tar_tmp_path: /tmp
+          debug: true
 
