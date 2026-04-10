@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "home": "Home",
+    "eas": "EA Strategies",
+    "metrics": "Metrics",
+    "learn": "Learning",
+    "about": "About/Join"
+  },
+  "home": {
+    "heroTitle": "Quantitative Forex, Infinite Possibilities",
+    "heroSubtitle": "Focusing on highly efficient EA development and metric analysis for MetaTrader.",
+    "viewEAs": "View Featured EAs"
+  }
+}

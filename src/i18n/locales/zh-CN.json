@@ -1,0 +1,14 @@
+{
+  "nav": {
+    "home": "首页",
+    "eas": "EA策略",
+    "metrics": "核心指标",
+    "learn": "教学中心",
+    "about": "关于/加入"
+  },
+  "home": {
+    "heroTitle": "量化外汇，探索无限可能",
+    "heroSubtitle": "专注于 MetaTrader 平台的高效 EA 研发与指标分析系统",
+    "viewEAs": "查看精选 EA"
+  }
+}

@@ -1,0 +1,31 @@
+name: Deploy deploy-test to cPanel (FTP)
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'deploy-test/**'
+      - '.github/workflows/deploy-cpanel-ftp.yml'
+
+concurrency:
+  group: deploy-cpanel
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy via FTP
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.CPANEL_FTP_SERVER }}
+          username: ${{ secrets.CPANEL_FTP_USERNAME }}
+          password: ${{ secrets.CPANEL_FTP_PASSWORD }}
+          local-dir: deploy-test/
+          server-dir: /public_html/deploy-test/
+          dangerous-clean-slate: true
+

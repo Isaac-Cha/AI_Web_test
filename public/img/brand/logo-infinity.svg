@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="480" viewBox="0 0 960 480" fill="none" role="img" aria-label="无限量化 Infinity Logo">
+  <title>无限量化</title>
+  <defs>
+    <linearGradient id="gradRibbon" x1="160" y1="140" x2="800" y2="340" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7FD8FF"/>
+      <stop offset="0.26" stop-color="#88F0D3"/>
+      <stop offset="0.52" stop-color="#FFE3A2"/>
+      <stop offset="0.76" stop-color="#FFB8A3"/>
+      <stop offset="1" stop-color="#D7A6FF"/>
+    </linearGradient>
+    <linearGradient id="gradDeep" x1="190" y1="120" x2="770" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#0B58B6"/>
+      <stop offset="0.42" stop-color="#143C7A"/>
+      <stop offset="1" stop-color="#0A214A"/>
+    </linearGradient>
+    <linearGradient id="gradSpec" x1="360" y1="80" x2="560" y2="420" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.82"/>
+      <stop offset="0.24" stop-color="#FFFFFF" stop-opacity="0.32"/>
+      <stop offset="0.62" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <radialGradient id="gradDot" cx="0" cy="0" r="1" gradientUnits="userSpaceOnUse" gradientTransform="translate(0 0) rotate(90) scale(10)">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="1"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="4" result="b1"/>
+      <feColorMatrix in="b1" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.22 0" result="g1"/>
+      <feMerge>
+        <feMergeNode in="g1"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="inner" x="-20%" y="-20%" width="140%" height="140%" color-interpolation-filters="sRGB">
+      <feOffset dx="0" dy="10"/>
+      <feGaussianBlur stdDeviation="12" result="s"/>
+      <feComposite in="s" in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="i"/>
+      <feColorMatrix in="i" type="matrix" values="0 0 0 0 0.01  0 0 0 0 0.05  0 0 0 0 0.12  0 0 0 0.65 0"/>
+      <feBlend in="SourceGraphic" mode="multiply"/>
+    </filter>
+  </defs>
+
+  <g transform="translate(480 240) rotate(-12) scale(1.08 0.98) translate(-480 -240)">
+    <path d="M224 240C224 128 360 112 432 192C465.6 229.3 504.4 276.7 528 288C568 308 648 314 696 268C734 232 734 170 696 140C650 106 576 122 528 174C495 210 464 248 432 288C356 384 224 364 200 284C188 238 198 260 224 240Z" fill="url(#gradDeep)" opacity="0.45"/>
+    <path d="M224 240C224 128 360 112 432 192C465.6 229.3 504.4 276.7 528 288C568 308 648 314 696 268C734 232 734 170 696 140C650 106 576 122 528 174C495 210 464 248 432 288C356 384 224 364 200 284C188 238 198 260 224 240Z" stroke="url(#gradRibbon)" stroke-width="84" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" opacity="0.92"/>
+    <path d="M224 240C224 128 360 112 432 192C465.6 229.3 504.4 276.7 528 288C568 308 648 314 696 268C734 232 734 170 696 140C650 106 576 122 528 174C495 210 464 248 432 288C356 384 224 364 200 284C188 238 198 260 224 240Z" stroke="url(#gradSpec)" stroke-width="18" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" style="mix-blend-mode:screen"/>
+    <path d="M224 240C224 128 360 112 432 192C465.6 229.3 504.4 276.7 528 288C568 308 648 314 696 268C734 232 734 170 696 140C650 106 576 122 528 174C495 210 464 248 432 288C356 384 224 364 200 284C188 238 198 260 224 240Z" fill="none" stroke="#FFFFFF" stroke-opacity="0.15" stroke-width="92" stroke-linecap="round" stroke-linejoin="round" filter="url(#inner)"/>
+
+    <g opacity="0.92">
+      <circle cx="316" cy="172" r="9" fill="url(#gradDot)" transform="translate(316 172)"/>
+      <circle cx="354" cy="140" r="5" fill="url(#gradDot)" transform="translate(354 140)"/>
+      <circle cx="420" cy="210" r="8" fill="url(#gradDot)" transform="translate(420 210)"/>
+      <circle cx="548" cy="298" r="10" fill="url(#gradDot)" transform="translate(548 298)"/>
+      <circle cx="612" cy="324" r="6" fill="url(#gradDot)" transform="translate(612 324)"/>
+      <circle cx="682" cy="254" r="7" fill="url(#gradDot)" transform="translate(682 254)"/>
+      <circle cx="250" cy="292" r="6" fill="url(#gradDot)" transform="translate(250 292)"/>
+    </g>
+  </g>
+</svg>

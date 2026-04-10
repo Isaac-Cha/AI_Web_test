@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="256" viewBox="0 0 512 256" fill="none" role="img" aria-label="无限量化 Infinity Mark">
+  <title>∞</title>
+  <defs>
+    <linearGradient id="grad" x1="64" y1="64" x2="448" y2="192" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#7FD8FF"/>
+      <stop offset="0.3" stop-color="#88F0D3"/>
+      <stop offset="0.55" stop-color="#FFE3A2"/>
+      <stop offset="0.8" stop-color="#FFB8A3"/>
+      <stop offset="1" stop-color="#D7A6FF"/>
+    </linearGradient>
+    <linearGradient id="spec" x1="200" y1="40" x2="320" y2="216" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="0.25" stop-color="#FFFFFF" stop-opacity="0.3"/>
+      <stop offset="0.65" stop-color="#FFFFFF" stop-opacity="0.08"/>
+      <stop offset="1" stop-color="#FFFFFF" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="glow" x="-30%" y="-30%" width="160%" height="160%" color-interpolation-filters="sRGB">
+      <feGaussianBlur stdDeviation="3" result="b"/>
+      <feColorMatrix in="b" type="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 0.22 0" result="g"/>
+      <feMerge>
+        <feMergeNode in="g"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+  <g transform="translate(256 128) rotate(-12) scale(1.06 0.98) translate(-256 -128)">
+    <path d="M110 128C110 74 176 68 214 102C231 117 245 134 256 148C267 162 281 179 298 194C336 228 402 220 402 128C402 36 336 28 298 62C281 77 267 94 256 108C245 122 231 139 214 154C176 188 110 182 110 128Z" stroke="url(#grad)" stroke-width="48" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" opacity="0.92"/>
+    <path d="M110 128C110 74 176 68 214 102C231 117 245 134 256 148C267 162 281 179 298 194C336 228 402 220 402 128C402 36 336 28 298 62C281 77 267 94 256 108C245 122 231 139 214 154C176 188 110 182 110 128Z" stroke="url(#spec)" stroke-width="12" stroke-linecap="round" stroke-linejoin="round" opacity="0.55" style="mix-blend-mode:screen"/>
+  </g>
+</svg>

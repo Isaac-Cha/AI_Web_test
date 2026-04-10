@@ -1,0 +1,55 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans", Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji";
+  line-height: 1.5;
+  font-weight: 400;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@keyframes logoShimmer {
+  0% {
+    transform: translateX(-60%) rotate(12deg);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.25;
+  }
+  100% {
+    transform: translateX(160%) rotate(12deg);
+    opacity: 0;
+  }
+}
+
+.logo-shimmer {
+  position: relative;
+  isolation: isolate;
+}
+
+.logo-shimmer::after {
+  content: "";
+  position: absolute;
+  inset: -8% -12%;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.35) 35%,
+    rgba(255, 255, 255, 0.06) 55%,
+    rgba(255, 255, 255, 0) 80%
+  );
+  mix-blend-mode: soft-light;
+  filter: blur(1px);
+  transform: translateX(-60%) rotate(12deg);
+  animation: logoShimmer 9.5s ease-in-out infinite;
+  pointer-events: none;
+  z-index: 2;
+}
