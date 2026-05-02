@@ -80,7 +80,7 @@ jobs:
           timeout: 120s
           command_timeout: 15m
           source: "Emergent/frontend/build/**"
-          strip_components: 1
+          strip_components: 3
           target: ${{ env.VPS_SITE_TARGET_DIR }}
           overwrite: true
           tar_tmp_path: /tmp
