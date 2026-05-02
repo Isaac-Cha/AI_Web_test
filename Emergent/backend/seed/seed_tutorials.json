@@ -1,0 +1,23 @@
+[
+  {
+    "id": "t-mt4-setup",
+    "sort": 10,
+    "status": "published",
+    "title_zh": "MT4 / MT5 安装与 VPS 部署",
+    "title_en": "MT4/MT5 Setup & VPS Deploy",
+    "cloud_zh": "百度云盘",
+    "cloud_en": "Baidu Pan",
+    "url": "#baidu-pan-placeholder"
+  },
+  {
+    "id": "t-ea-install",
+    "sort": 20,
+    "status": "published",
+    "title_zh": "EA 正确加载与参数优化",
+    "title_en": "EA Loading & Parameter Tuning",
+    "cloud_zh": "百度云盘",
+    "cloud_en": "Baidu Pan",
+    "url": "#baidu-pan-placeholder"
+  }
+]
+

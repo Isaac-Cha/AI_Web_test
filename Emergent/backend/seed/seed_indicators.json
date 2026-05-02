@@ -1,0 +1,35 @@
+[
+  {
+    "id": "ind-liquidity-map",
+    "sort": 10,
+    "status": "published",
+    "name_zh": "流动性地图",
+    "name_en": "Liquidity Map",
+    "category_zh": "工具面板",
+    "category_en": "Tools",
+    "desc_zh": "显示潜在流动性聚集区，辅助更精确的入场与止损布置。",
+    "desc_en": "Highlights liquidity clusters for more precise entries and risk placement.",
+    "cover": "https://images.unsplash.com/photo-1642790551116-18e150f248e3?auto=format&fit=crop&w=1600&q=70",
+    "usage_zh": "安装后在任意图表启用，通过参数调节阈值与显示范围。建议与结构分析搭配。",
+    "usage_en": "Enable on any chart and tune thresholds/range. Use alongside structure analysis.",
+    "features_zh": ["多时间框架聚合", "阈值自适应", "区域高亮可配置"],
+    "features_en": ["Multi-timeframe aggregation", "Adaptive threshold", "Configurable highlights"]
+  },
+  {
+    "id": "ind-session-clock",
+    "sort": 20,
+    "status": "published",
+    "name_zh": "交易时段时钟",
+    "name_en": "Session Clock",
+    "category_zh": "工具面板",
+    "category_en": "Tools",
+    "desc_zh": "伦敦/纽约/亚洲 session 重叠可视化，帮助选择更有效的交易窗口。",
+    "desc_en": "Visualizes London/NY/Asia sessions and overlaps for better timing.",
+    "cover": "https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=1600&q=70",
+    "usage_zh": "在图表角落显示当前时段状态与剩余时间，可自定义时区。",
+    "usage_en": "Shows current session and countdown; timezone configurable.",
+    "features_zh": ["三大时段自动识别", "交叠时段高亮", "倒计时提示"],
+    "features_en": ["Auto session detection", "Overlap highlighting", "Countdown"]
+  }
+]
+

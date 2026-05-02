@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 64" width="200" height="64">
+  <defs>
+    <linearGradient id="cgGrad" x1="0" x2="1" y1="0" y2="1">
+      <stop offset="0" stop-color="#FCD34D"/>
+      <stop offset="1" stop-color="#B45309"/>
+    </linearGradient>
+  </defs>
+  <rect x="2" y="2" width="196" height="60" rx="10" fill="none" stroke="url(#cgGrad)" stroke-width="1.5"/>
+  <text x="16" y="42" fill="url(#cgGrad)" font-family="Outfit, Arial, sans-serif" font-weight="900" font-size="30" letter-spacing="3">CG</text>
+  <text x="72" y="28" fill="#00F0FF" font-family="JetBrains Mono, monospace" font-size="9" letter-spacing="3">BROKER</text>
+  <text x="72" y="46" fill="#ffffff" font-family="Manrope, Arial, sans-serif" font-size="12" font-weight="600">Partner · Live</text>
+</svg>

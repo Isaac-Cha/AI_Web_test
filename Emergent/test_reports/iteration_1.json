@@ -1,0 +1,45 @@
+{
+  "summary": "Full backend + frontend review for 无限量化 MetaTrader marketing site. 13/13 pytest backend tests pass. All key frontend flows (hero canvas, nav anchors, i18n dropdown zh<->en, EA/Indicator/Tutorial card rendering from API, FAQ accordion, floating WeChat panel, join form submit + sonner success toast, mobile menu) verified working. Zero console errors on homepage.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Join form empty submission",
+        "issue": "Empty required form fields trigger browser's native HTML5 validation popup ('Please fill out this field.') instead of a sonner error toast. Functionally equivalent, but spec said 'error toast via sonner'. Consider preventDefault + toast.error for consistent branded UX.",
+        "affected_selectors": ["[data-testid=form-submit]", "[data-testid=form-name]"]
+      }
+    ],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_api.py",
+    "/app/test_reports/pytest/pytest_results.xml"
+  ],
+  "action_items": [
+    "(Optional) Replace HTML5 required validation on join form with explicit sonner toast.error on empty submit for consistency with the app's design language."
+  ],
+  "critical_code_review_comments": [
+    "server.py stores created_at as ISO string in Mongo and re-parses on list — works but mixing types; consider storing as datetime object directly (motor handles it).",
+    "server.py hard-codes EAs/indicators/tutorials — this is per user design choice (no admin backend). Fine for MVP but extract to JSON fixture for easier maintenance.",
+    "app.add_middleware(CORSMiddleware, ...) is added AFTER app.include_router — order works in FastAPI but conventionally middleware is added before routers.",
+    "EmailStr import unused (Optional[str] for email). Can be removed.",
+    "@app.on_event('shutdown') is deprecated in current FastAPI; recommend lifespan context manager."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_api.py"
+  ],
+  "success_rate": {
+    "backend": "100%",
+    "frontend": "100%"
+  },
+  "test_credentials": "N/A (no auth in app)",
+  "seed_data_creation": "Created 3 TEST_ prefixed submissions (TEST_Alice/TEST_Bob/TEST_Carol) + 1 join submission (TEST_PW_User) via Playwright form. Safe test data only; does not pollute production content.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend test suite at /app/backend/tests/test_api.py covers 13 cases (health, eas, indicators, tutorials, submission CRUD + validation). Lang toggle is a Radix DropdownMenu — tests must click [data-testid=lang-toggle] first, then [data-testid=lang-en]/[data-testid=lang-zh]; do NOT click lang-en directly (dropdown not mounted). Join form uses HTML5 required validation for empty submit; only valid submits trigger sonner toasts.",
+  "rca of the issue": "N/A — no failing flows."
+}

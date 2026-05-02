@@ -6,15 +6,9 @@ on:
     branches:
       - main
     paths:
-      - 'src/**'
-      - 'public/**'
-      - 'index.html'
-      - 'package.json'
-      - 'package-lock.json'
-      - 'vite.config.*'
-      - 'tsconfig*.json'
-      - 'tailwind.config.*'
-      - 'postcss.config.*'
+      - 'Emergent/frontend/**'
+      - 'vercel.json'
+      - '.vercelignore'
       - '.github/workflows/deploy-site-vps.yml'
 
 concurrency:
@@ -40,8 +34,9 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: 24
+          node-version: 20
           cache: npm
+          cache-dependency-path: Emergent/frontend/package-lock.json
 
       - name: Validate secrets
         run: |
@@ -58,9 +53,11 @@ jobs:
           printf 'VPS_SITE_TARGET_DIR bytes: ' && printf %s "$VPS_SITE_TARGET_DIR" | od -An -t x1
 
       - name: Install
+        working-directory: Emergent/frontend
         run: npm ci
 
       - name: Build
+        working-directory: Emergent/frontend
         run: npm run build
 
       - name: Ensure target directory exists
@@ -82,7 +79,7 @@ jobs:
           port: ${{ env.VPS_PORT }}
           timeout: 120s
           command_timeout: 15m
-          source: "dist/**"
+          source: "Emergent/frontend/build/**"
           strip_components: 1
           target: ${{ env.VPS_SITE_TARGET_DIR }}
           overwrite: true
