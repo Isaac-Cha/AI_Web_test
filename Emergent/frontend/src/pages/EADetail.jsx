@@ -12,8 +12,8 @@ import {
 import { useLang } from "@/context/LanguageContext";
 import VersionSwitcher, { useVariant, useHref } from "@/components/VersionSwitcher";
 import WechatQrModal from "@/components/WechatQrModal";
+import { API } from "@/lib/api";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const sf = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif";
 const BLUE = "#0071E3";
 

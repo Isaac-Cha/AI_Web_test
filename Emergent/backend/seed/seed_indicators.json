@@ -30,6 +30,31 @@
     "usage_en": "Shows current session and countdown; timezone configurable.",
     "features_zh": ["三大时段自动识别", "交叠时段高亮", "倒计时提示"],
     "features_en": ["Auto session detection", "Overlap highlighting", "Countdown"]
+  },
+  {
+    "id": "ind-tianyan-1",
+    "sort": 30,
+    "status": "published",
+    "name_zh": "天眼一号",
+    "name_en": "Tianyan No.1",
+    "category_zh": "趋势系统",
+    "category_en": "Trend System",
+    "desc_zh": "基于均线思路的趋势提示系统（来源帖作者宣称命中率 95%+，需自行验证）。",
+    "desc_en": "A trend-following signal system based on MA concepts (author claims 95%+ accuracy; verify independently).",
+    "cover": "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=Tianyan%20No.1%20trend%20signal%20system%20poster%2C%20dark%20obsidian%20background%2C%20gold%20and%20cyan%20accents%2C%20abstract%20candlestick%20chart%2C%20moving%20average%20ribbons%2C%20eye%20motif%2C%20clean%20modern%20typography%2C%20high%20contrast%2C%20minimal&image_size=landscape_16_9",
+    "usage_zh": "主图：紫色双轨之上只做多、天蓝双轨之下只做空；信号与变色以收线后确认。副图：多空方向与K线走势提示；作者建议黄金 15 分钟周期。",
+    "usage_en": "Main: long above purple bands, short below blue bands; confirm after candle close. Sub: trend direction and oscillator hints; author suggests XAUUSD M15.",
+    "features_zh": ["收线确认（不飘不移）", "减少频繁交易倾向", "趋势跟随，避免摸顶抄底"],
+    "features_en": ["Close-confirmed signals", "Discourages over-trading", "Trend-following, avoids catching tops/bottoms"],
+    "screenshots": [
+      "https://www.eahub.cn/data/attachment/forum/202303/29/185037p39lwwvim43mxw39.png",
+      "https://www.eahub.cn/data/attachment/forum/202303/29/185226yo6do91m06l6uxbn.png",
+      "https://www.eahub.cn/data/attachment/forum/202303/29/185256s44t8u5e5txo4oj8.png",
+      "https://www.eahub.cn/data/attachment/forum/202303/29/185328jbj1vjse1g120jhf.png",
+      "https://www.eahub.cn/data/attachment/forum/202303/29/185351gaczkmkzihehcsq6.png",
+      "https://www.eahub.cn/data/attachment/forum/202303/29/185516p761jamsaro6bsp7.png",
+      "https://www.eahub.cn/data/attachment/forum/202303/29/192434rsbvhiapxig0sa9z.png"
+    ],
+    "source_url": "https://www.eahub.cn/thread-70924-1-1.html"
   }
 ]
-

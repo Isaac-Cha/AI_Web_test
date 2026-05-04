@@ -5,8 +5,7 @@ import { useLang } from "@/context/LanguageContext";
 import { useHref } from "@/components/VersionSwitcher";
 import { motion } from "framer-motion";
 import { Cloud, ArrowUpRight, PlayCircle, ArrowRight } from "lucide-react";
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from "@/lib/api";
 
 export default function Tutorials() {
   const { lang, t } = useLang();

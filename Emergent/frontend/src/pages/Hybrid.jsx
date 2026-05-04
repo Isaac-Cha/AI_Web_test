@@ -12,8 +12,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Globe, ArrowRight, ChevronRight, Plus } from "lucide-react";
+import { API } from "@/lib/api";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const ACCENT = "#00F0FF";
 const GOLD = "#F59E0B";
 

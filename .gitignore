@@ -38,3 +38,6 @@ Emergent/tools/tick_desktop/download/
 
 # One-off local scripts
 generate_mock_2026_ticks.py
+
+# Temporary scraping artifacts
+eahub_*.html

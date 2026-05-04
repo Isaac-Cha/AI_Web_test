@@ -6,8 +6,8 @@ import { CheckCircle2, Sparkles, BookOpen } from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
 import VersionSwitcher, { useVariant, useHref } from "@/components/VersionSwitcher";
 import WechatQrModal from "@/components/WechatQrModal";
+import { API } from "@/lib/api";
 
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
 const sf = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif";
 
 function DetailNav({ variant, homeHref }) {
@@ -234,6 +234,36 @@ export default function IndicatorDetail() {
           </button>
         </motion.div>
       </section>
+
+      {Array.isArray(ind.screenshots) && ind.screenshots.length > 0 && (
+        <section className="max-w-7xl mx-auto px-6 md:px-10 pb-24">
+          <motion.div
+            initial={{ opacity: 0, y: 18 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className={`${cardCls} p-6 md:p-8`}
+            data-testid="indicator-screenshots"
+          >
+            <div className={`mb-4 ${isApple ? "font-mono text-[11px] tracking-[0.25em] uppercase text-[#0071E3]" : "section-label"}`}>
+              SCREENSHOTS
+            </div>
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {ind.screenshots.map((u, idx) => (
+                <a
+                  key={`${u}-${idx}`}
+                  href={u}
+                  target="_blank"
+                  rel="noreferrer"
+                  className={`block overflow-hidden rounded-xl border ${isApple ? "border-black/10 bg-white" : "border-white/10 bg-white/5"}`}
+                >
+                  <img src={u} alt={`${ind.name_en} screenshot ${idx + 1}`} className="w-full h-48 object-cover" loading="lazy" />
+                </a>
+              ))}
+            </div>
+          </motion.div>
+        </section>
+      )}
 
       <WechatQrModal open={qrOpen} onOpenChange={setQrOpen} />
     </div>

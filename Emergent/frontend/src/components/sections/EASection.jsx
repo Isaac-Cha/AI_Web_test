@@ -5,8 +5,7 @@ import { useLang } from "@/context/LanguageContext";
 import { useHref } from "@/components/VersionSwitcher";
 import { motion } from "framer-motion";
 import { Activity, AlertTriangle, TrendingUp, Wallet, Shield, ArrowRight } from "lucide-react";
-
-const API = `${process.env.REACT_APP_BACKEND_URL}/api`;
+import { API } from "@/lib/api";
 
 const riskColor = (risk) => {
   if (!risk) return "text-gray-300";

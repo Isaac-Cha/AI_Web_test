@@ -31,6 +31,12 @@ def require_admin(x_admin_token: Optional[str] = Header(default=None)) -> None:
         raise HTTPException(status_code=401, detail="unauthorized")
 
 
+@api_router.get("/health")
+async def health():
+    await client.admin.command("ping")
+    return {"ok": True}
+
+
 # ---------- Models ----------
 class SubmissionBase(BaseModel):
     model_config = ConfigDict(extra="ignore")
@@ -141,6 +147,8 @@ class IndicatorIn(BaseModel):
     desc_zh: str
     desc_en: str
     cover: Optional[str] = None
+    screenshots: Optional[List[str]] = None
+    source_url: Optional[str] = None
     usage_zh: Optional[str] = None
     usage_en: Optional[str] = None
     features_zh: Optional[List[str]] = None
