@@ -28,10 +28,10 @@ def upsert_many(col, rows, key_field: str):
 
 
 def main() -> None:
-  db_uri = os.environ.get('DB_URI')
+  db_uri = os.environ.get('DB_URI') or os.environ.get('MONGO_URL')
   db_name = os.environ.get('DB_NAME')
   if not db_uri or not db_name:
-    raise SystemExit('Please set DB_URI and DB_NAME')
+    raise SystemExit('Please set DB_URI(or MONGO_URL) and DB_NAME')
 
   repo_root = Path(__file__).resolve().parents[1]
   seed_dir = repo_root / 'seed'
@@ -52,4 +52,3 @@ def main() -> None:
 
 if __name__ == '__main__':
   main()
-
