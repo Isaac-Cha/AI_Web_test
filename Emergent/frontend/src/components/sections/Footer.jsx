@@ -13,7 +13,7 @@ export default function Footer() {
               <div className="w-9 h-9 rounded-md bg-gradient-to-br from-gold-300 to-gold-700 flex items-center justify-center font-display font-black text-black">∞</div>
               <div>
                 <div className="font-display font-bold">无限量化 MetaTrader</div>
-                <div className="font-mono text-[10px] tracking-[0.25em] text-cyan2">FOREX · QUANT · AUTO</div>
+                <div className="font-mono text-[10px] tracking-[0.25em] text-cyan2">QUANT · SYSTEM · AUTO</div>
               </div>
             </div>
             <p className="mt-5 text-sm text-gray-500 leading-relaxed max-w-md">

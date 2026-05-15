@@ -10,7 +10,7 @@ export const translations = {
       openAccount: "咨询合作",
     },
     hero: {
-      tagline: "FOREX · QUANTITATIVE · AUTOMATION",
+      tagline: "QUANT · AUTOMATION · SYSTEM",
       title1: "无限量化",
       title2: "重塑交易",
       title3: "自动交易",
@@ -135,7 +135,7 @@ export const translations = {
       openAccount: "Contact",
     },
     hero: {
-      tagline: "FOREX · QUANTITATIVE · AUTOMATION",
+      tagline: "QUANT · AUTOMATION · SYSTEM",
       title1: "MetaTrader",
       title2: "Reengineered",
       title3: "Auto Trading",
@@ -163,7 +163,7 @@ export const translations = {
       faqs: [
         { q: "Minimum capital?", a: "Standard $100; Pro EA accounts recommended from $1,000." },
         { q: "Deposit / Withdrawal?", a: "Instant deposits, withdrawals in 1-3 business days." },
-        { q: "Supported symbols?", a: "FX, XAUUSD Gold, COMEX futures, Indices and Oil." },
+        { q: "Supported symbols?", a: "Currency pairs, metals, indices, oil, and crypto." },
         { q: "Can I run my own EA?", a: "Yes, MT4/MT5 with one-click VPS deploy." },
       ],
       scan: "Contact",
@@ -242,7 +242,7 @@ export const translations = {
     footer: {
       rights: "All rights reserved",
       disclaimer:
-        "Leveraged FX trading carries substantial risk. Content is informational only, not investment advice.",
+        "Leveraged trading carries substantial risk. Content is informational only, not investment advice.",
     },
     toast: {
       success: "Submitted! We'll reach out shortly.",

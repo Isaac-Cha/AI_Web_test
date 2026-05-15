@@ -17,7 +17,7 @@ export default function Hero() {
   const { t } = useLang();
   const lines = [
     { zh: t.hero.title1, en: "QUANTITATIVE", num: "01", tone: "gold" },
-    { zh: t.hero.title2, en: "RESHAPE · FX", num: "02", tone: "white" },
+    { zh: t.hero.title2, en: "RESHAPE · TRADING", num: "02", tone: "white" },
     { zh: t.hero.title3, en: "AUTO-TRADE", num: "03", tone: "cyan" },
   ];
 
