@@ -170,6 +170,7 @@ class TutorialIn(BaseModel):
     cloud_zh: str
     cloud_en: str
     url: str
+    tags: Optional[List[str]] = None
 
 
 class TutorialOut(TutorialIn):
@@ -201,9 +202,14 @@ class OrderIn(BaseModel):
 
 
 def _normalize_dt(doc: dict) -> dict:
+    now = datetime.now(timezone.utc)
     for k in ("created_at", "updated_at"):
-        if isinstance(doc.get(k), str):
-            doc[k] = datetime.fromisoformat(doc[k])
+        v = doc.get(k)
+        if v is None:
+            doc[k] = now
+            continue
+        if isinstance(v, str):
+            doc[k] = datetime.fromisoformat(v)
     return doc
 
 

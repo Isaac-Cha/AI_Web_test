@@ -7,7 +7,8 @@
     "title_en": "MT4/MT5 Setup & VPS Deploy",
     "cloud_zh": "百度云盘",
     "cloud_en": "Baidu Pan",
-    "url": "#baidu-pan-placeholder"
+    "url": "#baidu-pan-placeholder",
+    "tags": ["MT4", "MT5", "VPS"]
   },
   {
     "id": "t-ea-install",
@@ -17,7 +18,7 @@
     "title_en": "EA Loading & Parameter Tuning",
     "cloud_zh": "百度云盘",
     "cloud_en": "Baidu Pan",
-    "url": "#baidu-pan-placeholder"
+    "url": "#baidu-pan-placeholder",
+    "tags": ["EA", "参数"]
   }
 ]
-

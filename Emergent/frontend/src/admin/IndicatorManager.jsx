@@ -1,12 +1,32 @@
 import React, { useEffect, useState } from "react";
 import api from "./api";
-import { Trash2 } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
 
 export default function IndicatorManager() {
   const [indicators, setIndicators] = useState([]);
   const [loading, setLoading] = useState(true);
   const [importOpen, setImportOpen] = useState(false);
+  const [formOpen, setFormOpen] = useState(false);
+  const [formMode, setFormMode] = useState("create");
+  const [form, setForm] = useState({
+    id: "",
+    sort: 1000,
+    status: "draft",
+    name_zh: "",
+    name_en: "",
+    category_zh: "",
+    category_en: "",
+    desc_zh: "",
+    desc_en: "",
+    cover: "",
+    usage_zh: "",
+    usage_en: "",
+    features_zh: "",
+    features_en: "",
+    screenshots: "",
+    source_url: "",
+  });
   const [importText, setImportText] = useState(
     JSON.stringify(
       {
@@ -88,18 +108,121 @@ export default function IndicatorManager() {
     fetchIndicators();
   };
 
+  const openCreate = () => {
+    setFormMode("create");
+    setForm({
+      id: "",
+      sort: 1000,
+      status: "draft",
+      name_zh: "",
+      name_en: "",
+      category_zh: "",
+      category_en: "",
+      desc_zh: "",
+      desc_en: "",
+      cover: "",
+      usage_zh: "",
+      usage_en: "",
+      features_zh: "",
+      features_en: "",
+      screenshots: "",
+      source_url: "",
+    });
+    setFormOpen(true);
+  };
+
+  const openEdit = (ind) => {
+    setFormMode("edit");
+    setForm({
+      id: ind.id || "",
+      sort: ind.sort ?? 1000,
+      status: ind.status || "draft",
+      name_zh: ind.name_zh || "",
+      name_en: ind.name_en || "",
+      category_zh: ind.category_zh || "",
+      category_en: ind.category_en || "",
+      desc_zh: ind.desc_zh || "",
+      desc_en: ind.desc_en || "",
+      cover: ind.cover || "",
+      usage_zh: ind.usage_zh || "",
+      usage_en: ind.usage_en || "",
+      features_zh: Array.isArray(ind.features_zh) ? ind.features_zh.join(",") : "",
+      features_en: Array.isArray(ind.features_en) ? ind.features_en.join(",") : "",
+      screenshots: Array.isArray(ind.screenshots) ? ind.screenshots.join("\n") : "",
+      source_url: ind.source_url || "",
+    });
+    setFormOpen(true);
+  };
+
+  const handleFormSave = async () => {
+    if (!form.id?.trim()) {
+      toast.error("缺少 id");
+      return;
+    }
+    if (!form.name_zh?.trim()) {
+      toast.error("缺少名称");
+      return;
+    }
+    const payload = {
+      id: form.id.trim(),
+      sort: Number(form.sort) || 1000,
+      status: form.status,
+      name_zh: form.name_zh,
+      name_en: form.name_en || "",
+      category_zh: form.category_zh || "",
+      category_en: form.category_en || "",
+      desc_zh: form.desc_zh || "",
+      desc_en: form.desc_en || "",
+      cover: form.cover || "",
+      usage_zh: form.usage_zh || "",
+      usage_en: form.usage_en || "",
+      source_url: form.source_url || "",
+      features_zh: form.features_zh
+        ? form.features_zh.split(",").map((s) => s.trim()).filter(Boolean)
+        : [],
+      features_en: form.features_en
+        ? form.features_en.split(",").map((s) => s.trim()).filter(Boolean)
+        : [],
+      screenshots: form.screenshots
+        ? form.screenshots.split("\n").map((s) => s.trim()).filter(Boolean)
+        : [],
+    };
+    try {
+      if (formMode === "create") {
+        await api.post("/admin/indicators", payload);
+        toast.success("已创建");
+      } else {
+        await api.put(`/admin/indicators/${payload.id}`, payload);
+        toast.success("已更新");
+      }
+      setFormOpen(false);
+      fetchIndicators();
+    } catch (e) {
+      toast.error("保存失败");
+    }
+  };
+
   return (
     <>
       <div className="bg-neutral-800 rounded-2xl border border-neutral-700 overflow-hidden">
       <div className="px-6 py-4 border-b border-neutral-700 flex justify-between items-center bg-neutral-800/50">
         <h2 className="text-xl font-bold text-white">指标管理</h2>
-        <button
-          type="button"
-          onClick={() => setImportOpen(true)}
-          className="px-4 py-2 rounded-xl bg-blue-500/15 text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 transition-colors text-sm"
-        >
-          导入 JSON
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={openCreate}
+            className="px-4 py-2 rounded-xl bg-green-500/15 text-green-300 border border-green-500/30 hover:bg-green-500/20 transition-colors text-sm"
+          >
+            手动新增
+          </button>
+          <button
+            type="button"
+            onClick={() => setImportOpen(true)}
+            className="px-4 py-2 rounded-xl bg-blue-500/15 text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 transition-colors text-sm"
+          >
+            导入 JSON
+          </button>
+        </div>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-left border-collapse">
@@ -126,6 +249,16 @@ export default function IndicatorManager() {
                   </span>
                 </td>
                 <td className="px-6 py-4 text-neutral-400 text-sm whitespace-nowrap space-x-4">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      openEdit(ind);
+                    }}
+                    className="text-blue-300 hover:text-blue-200 transition-colors"
+                    title="编辑"
+                  >
+                    <Edit size={18} />
+                  </button>
                   <button onClick={() => handleDelete(ind.id)} className="text-red-400 hover:text-red-300 transition-colors" title="删除">
                     <Trash2 size={18} />
                   </button>
@@ -182,6 +315,176 @@ export default function IndicatorManager() {
           </div>
         </div>
       </div>
+      )}
+      {formOpen && (
+        <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
+          <div className="w-full max-w-3xl rounded-2xl bg-neutral-900 border border-neutral-700 overflow-hidden">
+            <div className="px-6 py-4 border-b border-neutral-700 flex items-center justify-between">
+              <div className="text-white font-semibold">
+                {formMode === "create" ? "手动新增指标" : "编辑指标"}
+              </div>
+              <button
+                type="button"
+                onClick={() => setFormOpen(false)}
+                className="text-neutral-400 hover:text-white"
+              >
+                关闭
+              </button>
+            </div>
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">id</div>
+                  <input
+                    value={form.id}
+                    disabled={formMode === "edit"}
+                    onChange={(e) => setForm({ ...form, id: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200 disabled:opacity-60"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">状态</div>
+                  <select
+                    value={form.status}
+                    onChange={(e) => setForm({ ...form, status: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  >
+                    <option value="draft">草稿</option>
+                    <option value="published">已发布</option>
+                  </select>
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">名称(中文)</div>
+                  <input
+                    value={form.name_zh}
+                    onChange={(e) => setForm({ ...form, name_zh: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">名称(英文)</div>
+                  <input
+                    value={form.name_en}
+                    onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">分类(中文)</div>
+                  <input
+                    value={form.category_zh}
+                    onChange={(e) => setForm({ ...form, category_zh: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">分类(英文)</div>
+                  <input
+                    value={form.category_en}
+                    onChange={(e) => setForm({ ...form, category_en: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">排序 sort</div>
+                  <input
+                    value={form.sort}
+                    onChange={(e) => setForm({ ...form, sort: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">封面 URL</div>
+                  <input
+                    value={form.cover}
+                    onChange={(e) => setForm({ ...form, cover: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-xs text-neutral-400 mb-1">简介(中文)</div>
+                  <textarea
+                    value={form.desc_zh}
+                    onChange={(e) => setForm({ ...form, desc_zh: e.target.value })}
+                    className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-xs text-neutral-400 mb-1">简介(英文)</div>
+                  <textarea
+                    value={form.desc_en}
+                    onChange={(e) => setForm({ ...form, desc_en: e.target.value })}
+                    className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-xs text-neutral-400 mb-1">使用说明(中文)</div>
+                  <textarea
+                    value={form.usage_zh}
+                    onChange={(e) => setForm({ ...form, usage_zh: e.target.value })}
+                    className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-xs text-neutral-400 mb-1">使用说明(英文)</div>
+                  <textarea
+                    value={form.usage_en}
+                    onChange={(e) => setForm({ ...form, usage_en: e.target.value })}
+                    className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">特点(中文, 逗号分隔)</div>
+                  <input
+                    value={form.features_zh}
+                    onChange={(e) => setForm({ ...form, features_zh: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div>
+                  <div className="text-xs text-neutral-400 mb-1">特点(英文, 逗号分隔)</div>
+                  <input
+                    value={form.features_en}
+                    onChange={(e) => setForm({ ...form, features_en: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-xs text-neutral-400 mb-1">截图 URLs（每行一个）</div>
+                  <textarea
+                    value={form.screenshots}
+                    onChange={(e) => setForm({ ...form, screenshots: e.target.value })}
+                    className="w-full h-24 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+                <div className="md:col-span-2">
+                  <div className="text-xs text-neutral-400 mb-1">来源链接 source_url</div>
+                  <input
+                    value={form.source_url}
+                    onChange={(e) => setForm({ ...form, source_url: e.target.value })}
+                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-neutral-700 text-neutral-300 hover:bg-neutral-800"
+                >
+                  取消
+                </button>
+                <button
+                  type="button"
+                  onClick={handleFormSave}
+                  className="px-4 py-2 rounded-xl bg-green-500 text-white hover:bg-green-400"
+                >
+                  保存
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
     </>
   );
