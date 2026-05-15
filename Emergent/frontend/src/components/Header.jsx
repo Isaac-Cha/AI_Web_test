@@ -90,7 +90,7 @@ export default function Header() {
           </DropdownMenu>
 
           <button
-            onClick={() => jump("#platform")}
+            onClick={() => window.dispatchEvent(new Event("open-wechat-panel"))}
             data-testid="open-account-cta"
             className="hidden md:inline-flex items-center px-4 py-2 rounded-full bg-gold hover:bg-gold-300 text-black text-sm font-semibold transition-transform hover:-translate-y-0.5"
           >

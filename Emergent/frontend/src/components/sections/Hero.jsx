@@ -1,7 +1,7 @@
 import React from "react";
 import { useLang } from "@/context/LanguageContext";
 import StarField from "@/components/StarField";
-import { ChevronDown, QrCode, Zap } from "lucide-react";
+import { ChevronDown, MessageCircle, Zap } from "lucide-react";
 import { motion } from "framer-motion";
 
 const stagger = {
@@ -119,14 +119,15 @@ export default function Hero() {
               transition={{ duration: 0.8, delay: 0.85 }}
               className="mt-10 flex flex-wrap gap-4"
             >
-              <a
-                href="#platform"
+              <button
+                type="button"
                 data-testid="hero-cta-open-account"
+                onClick={() => window.dispatchEvent(new Event("open-wechat-panel"))}
                 className="group inline-flex items-center gap-2 px-6 py-3.5 bg-gold hover:bg-gold-300 text-black font-semibold rounded-full transition-all hover:-translate-y-0.5 shadow-[0_12px_40px_-10px_rgba(245,158,11,0.6)]"
               >
-                <QrCode size={18} />
+                <MessageCircle size={18} />
                 {t.hero.cta1}
-              </a>
+              </button>
               <a
                 href="#ea"
                 data-testid="hero-cta-ea"
@@ -138,31 +139,7 @@ export default function Hero() {
             </motion.div>
           </div>
 
-          <motion.div
-            initial={{ opacity: 0, scale: 0.9 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.9, delay: 0.4 }}
-            className="lg:col-span-4 float-y"
-          >
-            <div className="glass rounded-2xl p-4 w-full max-w-[220px] mx-auto ring-cyan-hover transition-all" data-testid="hero-qr-card">
-              <div className="flex items-center justify-between mb-3">
-                <div className="section-label text-[9px]">OPEN · CG</div>
-                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              </div>
-              <div className="aspect-square rounded-lg bg-white p-2">
-                <img
-                  src="/img/promotion-qr.png"
-                  alt="CG Open Account QR"
-                  className="w-full h-full object-contain"
-                  onError={(e) => { e.currentTarget.style.opacity = 0.3; }}
-                />
-              </div>
-              <div className="mt-3 flex items-center justify-between text-[10px]">
-                <span className="font-mono tracking-wider text-gray-400">Scan / 扫码</span>
-                <img src="/img/logo-CG.png" alt="CG" className="h-4 opacity-80" onError={(e)=>{e.currentTarget.style.display='none';}}/>
-              </div>
-            </div>
-          </motion.div>
+          <div className="lg:col-span-4" />
         </div>
 
         <motion.div

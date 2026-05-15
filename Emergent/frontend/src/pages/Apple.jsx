@@ -119,8 +119,8 @@ function AppleHero() {
         className="mt-6 text-[19px] text-black/70 max-w-xl mx-auto px-6 leading-relaxed"
       >
         {lang === "zh"
-          ? "顶级 EA 策略、MT4 / MT5 指标与 CG 平台一站式开户，专为专业交易者打造。"
-          : "Pro-grade EAs, MT4/MT5 indicators and one-tap CG broker onboarding — crafted for serious traders."}
+          ? "顶级 EA 策略、MT4 / MT5 指标与 CG 合作平台，专为专业交易者打造。"
+          : "Pro-grade EAs, MT4/MT5 indicators and partner broker support — crafted for serious traders."}
       </motion.p>
       <motion.div
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
@@ -129,9 +129,15 @@ function AppleHero() {
         <a href="#ea" data-testid="apple-cta-primary" className="inline-flex items-center gap-1 hover:underline" style={{ color: BLUE }}>
           {lang === "zh" ? "了解 EA 策略" : "Explore EAs"} <ChevronRight size={16} />
         </a>
-        <a href="#platform" data-testid="apple-cta-secondary" className="inline-flex items-center gap-1 hover:underline" style={{ color: BLUE }}>
-          {lang === "zh" ? "立即开户" : "Open account"} <ChevronRight size={16} />
-        </a>
+        <button
+          type="button"
+          data-testid="apple-cta-secondary"
+          onClick={() => window.dispatchEvent(new Event("open-wechat-panel"))}
+          className="inline-flex items-center gap-1 hover:underline"
+          style={{ color: BLUE }}
+        >
+          {lang === "zh" ? "咨询合作" : "Contact"} <ChevronRight size={16} />
+        </button>
       </motion.div>
     </section>
   );
@@ -310,7 +316,7 @@ function AppleBroker() {
   const { lang, t } = useLang();
   return (
     <section id="platform" className="max-w-[1024px] mx-auto px-5 mt-4">
-      <Tile dark className="p-10 md:p-16 grid md:grid-cols-2 gap-10 items-center" testId="apple-broker-tile">
+      <Tile dark className="p-10 md:p-16" testId="apple-broker-tile">
         <div>
           <div className="text-[13px] font-semibold tracking-widest uppercase" style={{ color: BLUE }}>
             Partner Broker
@@ -324,15 +330,14 @@ function AppleBroker() {
             {t.broker.desc}
           </p>
           <div className="mt-6 flex items-center gap-6 text-[15px]">
-            <a href="#about" className="hover:underline inline-flex items-center gap-1" style={{ color: BLUE }}>
-              {lang === "zh" ? "开户咨询" : "Start a conversation"} <ChevronRight size={15} />
-            </a>
-          </div>
-        </div>
-        <div className="flex justify-center md:justify-end">
-          <div className="bg-white rounded-2xl p-4 w-[180px]" data-testid="apple-broker-qr">
-            <img src="/img/promotion-qr.png" alt="CG QR" className="w-full aspect-square object-contain" />
-            <div className="mt-2 text-center text-[10px] font-medium text-black/60">Scan · 扫码开户</div>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("open-wechat-panel"))}
+              className="hover:underline inline-flex items-center gap-1"
+              style={{ color: BLUE }}
+            >
+              {lang === "zh" ? "咨询合作" : "Contact"} <ChevronRight size={15} />
+            </button>
           </div>
         </div>
       </Tile>

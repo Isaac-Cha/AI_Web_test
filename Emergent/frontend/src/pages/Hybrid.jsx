@@ -132,8 +132,8 @@ function HybridHero() {
           className="mt-6 text-[19px] text-white/75 max-w-xl mx-auto leading-relaxed"
         >
           {lang === "zh"
-            ? "顶级 EA 策略、MT4/MT5 指标与 CG 开户，一站式专业级外汇量化方案。"
-            : "Pro-grade EAs, MT4/MT5 indicators and one-tap CG onboarding."}
+            ? "顶级 EA 策略、MT4/MT5 指标与 CG 合作平台支持，一站式专业级外汇量化方案。"
+            : "Pro-grade EAs, MT4/MT5 indicators and partner broker support."}
         </motion.p>
         <motion.div
           initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}
@@ -142,9 +142,14 @@ function HybridHero() {
           <a href="#ea" className="inline-flex items-center gap-1 hover:opacity-80" style={{ color: ACCENT }}>
             {lang === "zh" ? "了解 EA" : "Explore EAs"} <ChevronRight size={16} />
           </a>
-          <a href="#platform" className="inline-flex items-center gap-1 hover:opacity-80" style={{ color: GOLD }}>
-            {lang === "zh" ? "开户" : "Open account"} <ChevronRight size={16} />
-          </a>
+          <button
+            type="button"
+            onClick={() => window.dispatchEvent(new Event("open-wechat-panel"))}
+            className="inline-flex items-center gap-1 hover:opacity-80"
+            style={{ color: GOLD }}
+          >
+            {lang === "zh" ? "咨询合作" : "Contact"} <ChevronRight size={16} />
+          </button>
         </motion.div>
       </div>
     </section>
@@ -327,7 +332,7 @@ function HybridBroker() {
   const { lang, t } = useLang();
   return (
     <section id="platform" className="max-w-[1024px] mx-auto px-5 mt-4">
-      <Tile solid="gold" className="p-10 md:p-16 grid md:grid-cols-2 gap-10 items-center" testId="hybrid-broker-tile">
+      <Tile solid="gold" className="p-10 md:p-16" testId="hybrid-broker-tile">
         <div>
           <div className="text-[13px] font-semibold tracking-widest uppercase font-mono" style={{ color: GOLD }}>
             Partner Broker
@@ -341,15 +346,14 @@ function HybridBroker() {
             {t.broker.desc}
           </p>
           <div className="mt-6">
-            <a href="#about" className="hover:opacity-80 inline-flex items-center gap-1 text-[15px]" style={{ color: ACCENT }}>
-              {lang === "zh" ? "开户咨询" : "Start a conversation"} <ChevronRight size={15} />
-            </a>
-          </div>
-        </div>
-        <div className="flex justify-center md:justify-end">
-          <div className="bg-white rounded-2xl p-4 w-[180px]" data-testid="hybrid-broker-qr">
-            <img src="/img/promotion-qr.png" alt="CG QR" className="w-full aspect-square object-contain" />
-            <div className="mt-2 text-center text-[10px] font-medium text-black/60">Scan · 扫码开户</div>
+            <button
+              type="button"
+              onClick={() => window.dispatchEvent(new Event("open-wechat-panel"))}
+              className="hover:opacity-80 inline-flex items-center gap-1 text-[15px]"
+              style={{ color: ACCENT }}
+            >
+              {lang === "zh" ? "咨询合作" : "Contact"} <ChevronRight size={15} />
+            </button>
           </div>
         </div>
       </Tile>

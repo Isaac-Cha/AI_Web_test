@@ -1,7 +1,7 @@
 import React from "react";
 import { useLang } from "@/context/LanguageContext";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ShieldCheck, Gift, TrendingUp, ExternalLink } from "lucide-react";
+import { ShieldCheck, Gift, TrendingUp } from "lucide-react";
 import { motion } from "framer-motion";
 
 const icons = [Gift, TrendingUp, ShieldCheck];
@@ -27,7 +27,7 @@ export default function CGBroker() {
 
         <div className="grid lg:grid-cols-12 gap-8">
           {/* Activities */}
-          <div className="lg:col-span-7">
+          <div className="lg:col-span-12">
             <div className="mb-5 flex items-center gap-3">
               <div className="h-px flex-1 bg-white/10" />
               <span className="font-mono text-xs text-gray-500 tracking-widest">{t.broker.activities}</span>
@@ -87,59 +87,6 @@ export default function CGBroker() {
                   </motion.div>
                 ))}
               </Accordion>
-            </div>
-          </div>
-
-          {/* QR */}
-          <div className="lg:col-span-5">
-            <div className="sticky top-24">
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true, margin: "-80px" }}
-                transition={{ duration: 0.6 }}
-                className="glass rounded-2xl p-5 border-white/10 ring-cyan-hover transition-all max-w-[280px] mx-auto"
-                data-testid="broker-qr-card"
-              >
-                <div className="flex items-center justify-between mb-4">
-                  <div>
-                    <div className="section-label">{t.broker.scan}</div>
-                    <div className="font-display text-base font-bold mt-1">CG · 新客开户直通</div>
-                  </div>
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-400 shadow-[0_0_12px_#10B981] animate-pulse" />
-                </div>
-                <div className="aspect-square rounded-xl bg-white p-3">
-                  <img
-                    src="/img/promotion-qr.png"
-                    alt="开户二维码"
-                    className="w-full h-full object-contain"
-                  />
-                </div>
-                <div className="mt-4 grid grid-cols-3 gap-1.5 text-center">
-                  <div className="p-1.5 rounded-md bg-white/5">
-                    <div className="font-mono text-cyan2 text-xs">MT4/5</div>
-                    <div className="text-[9px] text-gray-500 mt-0.5">Platforms</div>
-                  </div>
-                  <div className="p-1.5 rounded-md bg-white/5">
-                    <div className="font-mono text-gold text-xs">$100</div>
-                    <div className="text-[9px] text-gray-500 mt-0.5">Min</div>
-                  </div>
-                  <div className="p-1.5 rounded-md bg-white/5">
-                    <div className="font-mono text-white text-xs">24/7</div>
-                    <div className="text-[9px] text-gray-500 mt-0.5">Support</div>
-                  </div>
-                </div>
-                <a
-                  href="https://www.cgfintech108.com/en"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  data-testid="cg-visit-site-button"
-                  className="mt-4 w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-full bg-gradient-to-r from-gold-300 to-gold-700 text-black text-sm font-semibold hover:-translate-y-0.5 transition-transform"
-                >
-                  <ExternalLink size={14} />
-                  {t.broker.visitSite}
-                </a>
-              </motion.div>
             </div>
           </div>
         </div>

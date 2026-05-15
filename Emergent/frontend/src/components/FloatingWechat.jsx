@@ -1,8 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { MessageCircle, X } from "lucide-react";
 
 export default function FloatingWechat() {
   const [open, setOpen] = useState(false);
+  useEffect(() => {
+    const handler = () => setOpen(true);
+    window.addEventListener("open-wechat-panel", handler);
+    return () => window.removeEventListener("open-wechat-panel", handler);
+  }, []);
   return (
     <div className="fixed bottom-6 right-6 z-40 flex flex-col items-end gap-3" data-testid="floating-wechat">
       {open && (

@@ -7,7 +7,7 @@ export const translations = {
       indicators: "指标库",
       tutorials: "教学",
       about: "关于我们",
-      openAccount: "立即开户",
+      openAccount: "咨询合作",
     },
     hero: {
       tagline: "FOREX · QUANTITATIVE · AUTOMATION",
@@ -15,8 +15,8 @@ export const translations = {
       title2: "重塑外汇",
       title3: "自动交易",
       subtitle:
-        "顶级 EA 策略 · MT4/MT5 · CG 合作平台直通开户 · 黄金 XAUUSD / COMEX 量化解决方案",
-      cta1: "扫码开户",
+        "顶级 EA 策略 · MT4/MT5 · CG 合作平台 · 黄金 XAUUSD / COMEX 量化解决方案",
+      cta1: "咨询合作",
       cta2: "了解 EA 策略",
       stats: [
         { v: "120+", l: "合作交易员" },
@@ -27,22 +27,21 @@ export const translations = {
     },
     broker: {
       label: "PARTNER BROKER",
-      title: "CG 合作平台",
+      title: "合作平台",
       desc: "我们与 CG 平台深度合作，为交易者与 EA 经营者提供专业级交易环境、低延迟执行、稳定点差与多层风控。",
       activities: "活动与规则",
       faq: "常见问题",
       activitiesList: [
-        { t: "入金返佣计划", d: "新客户首入金享专属返佣阶梯，最高 30%。" },
-        { t: "EA 托管激励", d: "投放授权 EA 到合作账户可获月度激励。" },
+        { t: "入金返佣计划", d: "策略共享&技术支持" },
         { t: "资金方合作", d: "机构与高净值资金方开通独立风控通道。" },
       ],
       faqs: [
-        { q: "开户需要多少资金？", a: "标准账户最低 $100，专业 EA 账户建议 $1,000 起。" },
+        { q: "合作需要多少资金？", a: "起步资金建议 $100；专业级策略与风控建议 $1,000 起。" },
         { q: "出入金周期？", a: "工作日入金实时到账，出金一般 1-3 个工作日。" },
         { q: "支持哪些交易品种？", a: "外汇、XAUUSD 黄金、COMEX 期货、指数与原油。" },
         { q: "是否支持自己的 EA？", a: "支持，CG 提供低延迟 MT4/MT5 与 VPS 一键部署。" },
       ],
-      scan: "扫码开户 · Scan to Open",
+      scan: "咨询合作",
       visitSite: "进入 CG 官网",
     },
     ea: {
@@ -133,7 +132,7 @@ export const translations = {
       indicators: "Indicators",
       tutorials: "Tutorials",
       about: "About",
-      openAccount: "Open Account",
+      openAccount: "Contact",
     },
     hero: {
       tagline: "FOREX · QUANTITATIVE · AUTOMATION",
@@ -141,8 +140,8 @@ export const translations = {
       title2: "Reengineered",
       title3: "Auto Trading",
       subtitle:
-        "Top-tier EA strategies · MT4/MT5 · CG broker direct onboarding · Gold XAUUSD / COMEX quant solutions",
-      cta1: "Scan to Open",
+        "Top-tier EA strategies · MT4/MT5 · Partner broker support · Gold XAUUSD / COMEX quant solutions",
+      cta1: "Contact",
       cta2: "Explore EAs",
       stats: [
         { v: "120+", l: "Partner Traders" },
@@ -153,13 +152,12 @@ export const translations = {
     },
     broker: {
       label: "PARTNER BROKER",
-      title: "CG Broker",
+      title: "Broker",
       desc: "We partner with CG to deliver professional trading infrastructure: low-latency execution, stable spreads and layered risk management.",
       activities: "Activities & Rules",
       faq: "FAQ",
       activitiesList: [
-        { t: "Deposit Rebate", d: "New clients enjoy tiered rebate up to 30% on first deposits." },
-        { t: "EA Hosting Bonus", d: "Deploy licensed EAs on partner accounts for monthly incentives." },
+        { t: "Deposit Rebate", d: "Strategy sharing & technical support." },
         { t: "Capital Partnership", d: "Dedicated risk lane for institutions and high-net-worth capital." },
       ],
       faqs: [
@@ -168,7 +166,7 @@ export const translations = {
         { q: "Supported symbols?", a: "FX, XAUUSD Gold, COMEX futures, Indices and Oil." },
         { q: "Can I run my own EA?", a: "Yes, MT4/MT5 with one-click VPS deploy." },
       ],
-      scan: "Scan to Open",
+      scan: "Contact",
       visitSite: "Visit CG Website",
     },
     ea: {
