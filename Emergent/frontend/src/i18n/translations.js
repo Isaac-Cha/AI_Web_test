@@ -32,7 +32,7 @@ export const translations = {
       activities: "活动与规则",
       faq: "常见问题",
       activitiesList: [
-        { t: "入金返佣计划", d: "策略共享&技术支持" },
+        { t: "策略共享&技术支持", d: "" },
         { t: "资金方合作", d: "机构与高净值资金方开通独立风控通道。" },
       ],
       faqs: [
@@ -157,7 +157,7 @@ export const translations = {
       activities: "Activities & Rules",
       faq: "FAQ",
       activitiesList: [
-        { t: "Deposit Rebate", d: "Strategy sharing & technical support." },
+        { t: "Strategy sharing & technical support", d: "" },
         { t: "Capital Partnership", d: "Dedicated risk lane for institutions and high-net-worth capital." },
       ],
       faqs: [
