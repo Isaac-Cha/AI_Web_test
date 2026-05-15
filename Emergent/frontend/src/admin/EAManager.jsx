@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "./api";
 import { Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { autoEnglishFromZh, autoId } from "./textAuto";
 
 export default function EAManager() {
   const [eas, setEas] = useState([]);
@@ -9,6 +10,9 @@ export default function EAManager() {
   const [importOpen, setImportOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState("create");
+  const [idTouched, setIdTouched] = useState(false);
+  const [nameEnTouched, setNameEnTouched] = useState(false);
+  const [uploadingCover, setUploadingCover] = useState(false);
   const [form, setForm] = useState({
     id: "",
     sort: 1000,
@@ -65,6 +69,15 @@ export default function EAManager() {
     fetchEAs();
   }, []);
 
+  const uploadImage = async (file) => {
+    const fd = new FormData();
+    fd.append("file", file);
+    const res = await api.post("/admin/uploads/images", fd, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+    return res.data?.url;
+  };
+
   const fetchEAs = async () => {
     try {
       const res = await api.get("/eas?limit=500&include_draft=true");
@@ -117,6 +130,8 @@ export default function EAManager() {
 
   const openCreate = () => {
     setFormMode("create");
+    setIdTouched(false);
+    setNameEnTouched(false);
     setForm({
       id: "",
       sort: 1000,
@@ -144,6 +159,8 @@ export default function EAManager() {
 
   const openEdit = (ea) => {
     setFormMode("edit");
+    setIdTouched(true);
+    setNameEnTouched(true);
     setForm({
       id: ea.id || "",
       sort: ea.sort ?? 1000,
@@ -350,7 +367,7 @@ export default function EAManager() {
       )}
       {formOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
-          <div className="w-full max-w-3xl rounded-2xl bg-neutral-900 border border-neutral-700 overflow-hidden">
+          <div className="w-full max-w-3xl max-h-[85vh] rounded-2xl bg-neutral-900 border border-neutral-700 overflow-hidden">
             <div className="px-6 py-4 border-b border-neutral-700 flex items-center justify-between">
               <div className="text-white font-semibold">
                 {formMode === "create" ? "手动新增 EA" : "编辑 EA"}
@@ -363,14 +380,17 @@ export default function EAManager() {
                 关闭
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="text-xs text-neutral-400 mb-1">id</div>
                   <input
                     value={form.id}
                     disabled={formMode === "edit"}
-                    onChange={(e) => setForm({ ...form, id: e.target.value })}
+                    onChange={(e) => {
+                      setIdTouched(true);
+                      setForm({ ...form, id: e.target.value });
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200 disabled:opacity-60"
                   />
                 </div>
@@ -389,7 +409,17 @@ export default function EAManager() {
                   <div className="text-xs text-neutral-400 mb-1">名称(中文)</div>
                   <input
                     value={form.name_zh}
-                    onChange={(e) => setForm({ ...form, name_zh: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      const next = { ...form, name_zh: v };
+                      if (formMode === "create" && !idTouched && (!next.id || next.id.startsWith("ea-"))) {
+                        next.id = autoId("ea", v);
+                      }
+                      if (!nameEnTouched && !next.name_en) {
+                        next.name_en = autoEnglishFromZh(v);
+                      }
+                      setForm(next);
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
                   />
                 </div>
@@ -397,7 +427,10 @@ export default function EAManager() {
                   <div className="text-xs text-neutral-400 mb-1">名称(英文)</div>
                   <input
                     value={form.name_en}
-                    onChange={(e) => setForm({ ...form, name_en: e.target.value })}
+                    onChange={(e) => {
+                      setNameEnTouched(true);
+                      setForm({ ...form, name_en: e.target.value });
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
                   />
                 </div>
@@ -462,11 +495,41 @@ export default function EAManager() {
                 </div>
                 <div>
                   <div className="text-xs text-neutral-400 mb-1">封面 URL</div>
-                  <input
-                    value={form.cover}
-                    onChange={(e) => setForm({ ...form, cover: e.target.value })}
-                    className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
-                  />
+                  <div className="flex items-center gap-2">
+                    <input
+                      value={form.cover}
+                      onChange={(e) => setForm({ ...form, cover: e.target.value })}
+                      className="flex-1 bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
+                    />
+                    <label className="px-3 py-2 rounded-xl bg-blue-500/15 text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 transition-colors text-sm cursor-pointer whitespace-nowrap">
+                      {uploadingCover ? "上传中" : "上传"}
+                      <input
+                        type="file"
+                        accept="image/*"
+                        className="hidden"
+                        disabled={uploadingCover}
+                        onChange={async (e) => {
+                          const f = e.target.files?.[0];
+                          e.target.value = "";
+                          if (!f) return;
+                          try {
+                            setUploadingCover(true);
+                            const url = await uploadImage(f);
+                            if (url) {
+                              setForm((prev) => ({ ...prev, cover: url }));
+                              toast.success("封面已上传");
+                            } else {
+                              toast.error("上传失败");
+                            }
+                          } catch (err) {
+                            toast.error("上传失败");
+                          } finally {
+                            setUploadingCover(false);
+                          }
+                        }}
+                      />
+                    </label>
+                  </div>
                 </div>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

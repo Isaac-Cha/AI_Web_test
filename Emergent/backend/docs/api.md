@@ -70,6 +70,27 @@ Payload 字段（示例）：
 - `PUT /api/admin/tutorials/{t_id}`
 - `DELETE /api/admin/tutorials/{t_id}`
 
+## 图片上传（COS）
+
+- `POST /api/admin/uploads/images`
+  - Header：`X-Admin-Token: <ADMIN_TOKEN>`
+  - Content-Type：`multipart/form-data`
+  - 表单字段：`file=<image>`
+
+返回（示例）：
+
+```json
+{
+  "id": "2d0f1f6c-9f56-4bb3-83d0-8bf9b9a58f9a",
+  "url": "https://cgfintech-1257436994.cos.ap-chengdu.myqcloud.com/images/2026/05/15/xxxx.jpg",
+  "key": "images/2026/05/15/xxxx.jpg",
+  "filename": "cover.jpg",
+  "content_type": "image/jpeg",
+  "size": 123456,
+  "created_at": "2026-05-15T12:34:56.000Z"
+}
+```
+
 ## 线索表单
 
 - `POST /api/submissions`
@@ -80,4 +101,3 @@ Payload 字段（示例）：
 FastAPI 自带：
 - Swagger UI：`/docs`
 - OpenAPI JSON：`/openapi.json`
-

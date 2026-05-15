@@ -1,6 +1,7 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
+from starlette.concurrency import run_in_threadpool
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
@@ -178,6 +179,16 @@ class TutorialOut(TutorialIn):
     updated_at: datetime
 
 
+class UploadOut(BaseModel):
+    id: str
+    url: str
+    key: str
+    filename: Optional[str] = None
+    content_type: Optional[str] = None
+    size: Optional[int] = None
+    created_at: datetime
+
+
 class TickIn(BaseModel):
     model_config = ConfigDict(extra="ignore")
     ts: datetime
@@ -222,6 +233,8 @@ async def _ensure_indexes() -> None:
     await db.eas.create_index("id", unique=True)
     await db.indicators.create_index("id", unique=True)
     await db.tutorials.create_index("id", unique=True)
+    await db.uploads.create_index("id", unique=True)
+    await db.uploads.create_index("key", unique=True)
     await db.eas.create_index("sort")
     await db.indicators.create_index("sort")
     await db.tutorials.create_index("sort")
@@ -409,6 +422,119 @@ async def admin_update_tutorial(t_id: str, payload: TutorialIn):
 async def admin_delete_tutorial(t_id: str):
     await db.tutorials.delete_one({"id": t_id})
     return {"ok": True}
+
+
+def _cos_cfg() -> dict:
+    return {
+        "bucket": os.environ.get("COS_BUCKET", "").strip(),
+        "region": os.environ.get("COS_REGION", "").strip(),
+        "secret_id": os.environ.get("COS_SECRET_ID", "").strip(),
+        "secret_key": os.environ.get("COS_SECRET_KEY", "").strip(),
+        "base_url": os.environ.get("COS_BASE_URL", "").strip(),
+        "prefix": os.environ.get("COS_PREFIX", "images").strip().strip("/"),
+        "acl": os.environ.get("COS_ACL", "").strip(),
+    }
+
+
+def _cos_client():
+    try:
+        from qcloud_cos import CosConfig, CosS3Client
+    except Exception:
+        raise HTTPException(status_code=500, detail="COS SDK is not installed")
+    cfg = _cos_cfg()
+    if not cfg["bucket"] or not cfg["region"] or not cfg["secret_id"] or not cfg["secret_key"]:
+        raise HTTPException(status_code=500, detail="COS is not configured")
+    conf = CosConfig(
+        Region=cfg["region"],
+        SecretId=cfg["secret_id"],
+        SecretKey=cfg["secret_key"],
+        Scheme="https",
+    )
+    return CosS3Client(conf), cfg
+
+
+def _guess_ext(filename: str, content_type: str) -> str:
+    fn = (filename or "").lower()
+    if fn.endswith(".png"):
+        return "png"
+    if fn.endswith(".jpg") or fn.endswith(".jpeg"):
+        return "jpg"
+    if fn.endswith(".webp"):
+        return "webp"
+    if fn.endswith(".gif"):
+        return "gif"
+    ct = (content_type or "").lower()
+    if ct == "image/png":
+        return "png"
+    if ct == "image/jpeg":
+        return "jpg"
+    if ct == "image/webp":
+        return "webp"
+    if ct == "image/gif":
+        return "gif"
+    return ""
+
+
+@api_router.post("/admin/uploads/images", response_model=UploadOut, dependencies=[Depends(require_admin)])
+async def admin_upload_image(file: UploadFile = File(...)):
+    if not file:
+        raise HTTPException(status_code=400, detail="missing file")
+    if not (file.content_type or "").lower().startswith("image/"):
+        raise HTTPException(status_code=400, detail="only image uploads are allowed")
+    ext = _guess_ext(file.filename or "", file.content_type or "")
+    if not ext:
+        raise HTTPException(status_code=400, detail="unsupported image type")
+    data = await file.read()
+    if not data:
+        raise HTTPException(status_code=400, detail="empty file")
+    if len(data) > 10 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="file too large")
+
+    client_cos, cfg = _cos_client()
+    now = datetime.now(timezone.utc)
+    day = now.strftime("%Y/%m/%d")
+    key = f"{cfg['prefix']}/{day}/{uuid.uuid4().hex}.{ext}"
+
+    kwargs = {
+        "Bucket": cfg["bucket"],
+        "Key": key,
+        "Body": data,
+        "ContentType": file.content_type,
+    }
+    if cfg["acl"]:
+        kwargs["ACL"] = cfg["acl"]
+    try:
+        await run_in_threadpool(lambda: client_cos.put_object(**kwargs))
+    except HTTPException:
+        raise
+    except Exception:
+        raise HTTPException(status_code=502, detail="cos upload failed")
+
+    if cfg["base_url"]:
+        url = f"{cfg['base_url'].rstrip('/')}/{key}"
+    else:
+        url = f"https://{cfg['bucket']}.cos.{cfg['region']}.myqcloud.com/{key}"
+
+    rec_id = str(uuid.uuid4())
+    doc = {
+        "id": rec_id,
+        "url": url,
+        "key": key,
+        "filename": file.filename,
+        "content_type": file.content_type,
+        "size": len(data),
+        "created_at": now.isoformat(),
+    }
+    await db.uploads.insert_one(doc)
+    return UploadOut(
+        id=rec_id,
+        url=url,
+        key=key,
+        filename=file.filename,
+        content_type=file.content_type,
+        size=len(data),
+        created_at=now,
+    )
 
 
 @api_router.post("/admin/ticks/xauusd/batch", dependencies=[Depends(require_admin)])

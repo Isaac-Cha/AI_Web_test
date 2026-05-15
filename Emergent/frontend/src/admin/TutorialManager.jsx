@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import api from "./api";
 import { Trash2, Edit } from "lucide-react";
 import { toast } from "sonner";
+import { autoEnglishFromZh, autoId } from "./textAuto";
 
 export default function TutorialManager() {
   const [tutorials, setTutorials] = useState([]);
@@ -9,6 +10,8 @@ export default function TutorialManager() {
   const [importOpen, setImportOpen] = useState(false);
   const [formOpen, setFormOpen] = useState(false);
   const [formMode, setFormMode] = useState("create");
+  const [idTouched, setIdTouched] = useState(false);
+  const [titleEnTouched, setTitleEnTouched] = useState(false);
   const [form, setForm] = useState({
     id: "",
     sort: 1000,
@@ -94,6 +97,8 @@ export default function TutorialManager() {
 
   const openCreate = () => {
     setFormMode("create");
+    setIdTouched(false);
+    setTitleEnTouched(false);
     setForm({
       id: "",
       sort: 1000,
@@ -110,6 +115,8 @@ export default function TutorialManager() {
 
   const openEdit = (tut) => {
     setFormMode("edit");
+    setIdTouched(true);
+    setTitleEnTouched(true);
     setForm({
       id: tut.id || "",
       sort: tut.sort ?? 1000,
@@ -296,7 +303,7 @@ export default function TutorialManager() {
       )}
       {formOpen && (
         <div className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-6">
-          <div className="w-full max-w-3xl rounded-2xl bg-neutral-900 border border-neutral-700 overflow-hidden">
+          <div className="w-full max-w-3xl max-h-[85vh] rounded-2xl bg-neutral-900 border border-neutral-700 overflow-hidden">
             <div className="px-6 py-4 border-b border-neutral-700 flex items-center justify-between">
               <div className="text-white font-semibold">
                 {formMode === "create" ? "手动新增教程" : "编辑教程"}
@@ -309,14 +316,17 @@ export default function TutorialManager() {
                 关闭
               </button>
             </div>
-            <div className="p-6 space-y-4">
+            <div className="p-6 space-y-4 overflow-y-auto max-h-[75vh]">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <div className="text-xs text-neutral-400 mb-1">id</div>
                   <input
                     value={form.id}
                     disabled={formMode === "edit"}
-                    onChange={(e) => setForm({ ...form, id: e.target.value })}
+                    onChange={(e) => {
+                      setIdTouched(true);
+                      setForm({ ...form, id: e.target.value });
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200 disabled:opacity-60"
                   />
                 </div>
@@ -335,7 +345,17 @@ export default function TutorialManager() {
                   <div className="text-xs text-neutral-400 mb-1">标题(中文)</div>
                   <input
                     value={form.title_zh}
-                    onChange={(e) => setForm({ ...form, title_zh: e.target.value })}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      const next = { ...form, title_zh: v };
+                      if (formMode === "create" && !idTouched && (!next.id || next.id.startsWith("t-"))) {
+                        next.id = autoId("t", v);
+                      }
+                      if (!titleEnTouched && !next.title_en) {
+                        next.title_en = autoEnglishFromZh(v);
+                      }
+                      setForm(next);
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
                   />
                 </div>
@@ -343,7 +363,10 @@ export default function TutorialManager() {
                   <div className="text-xs text-neutral-400 mb-1">标题(英文)</div>
                   <input
                     value={form.title_en}
-                    onChange={(e) => setForm({ ...form, title_en: e.target.value })}
+                    onChange={(e) => {
+                      setTitleEnTouched(true);
+                      setForm({ ...form, title_en: e.target.value });
+                    }}
                     className="w-full bg-neutral-950 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-neutral-200"
                   />
                 </div>
