@@ -23,7 +23,7 @@ export default function Footer() {
           <div className="md:col-span-3">
             <div className="section-label mb-4">Keywords</div>
             <div className="flex flex-wrap gap-2 text-xs">
-              {["黄金", "外汇", "量化", "自动交易", "MT4", "MT5", "EA", "COMEX", "XAUUSD"].map((k) => (
+              {["黄金", "量化", "自动交易", "MT4", "MT5", "EA", "COMEX", "XAUUSD"].map((k) => (
                 <span key={k} className="px-2.5 py-1 rounded-full border border-white/10 text-gray-400">{k}</span>
               ))}
             </div>
@@ -33,7 +33,7 @@ export default function Footer() {
             <ul className="space-y-2 text-sm text-gray-400">
               <li>WeChat · 右下浮窗扫码</li>
               <li>Email · contact@wxlh-mt.com</li>
-              <li>Baidu SEO · 黄金 外汇 量化 MT4 MT5 EA</li>
+              <li>Baidu SEO · 黄金 量化 MT4 MT5 EA</li>
             </ul>
           </div>
         </div>

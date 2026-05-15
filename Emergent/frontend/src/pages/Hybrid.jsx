@@ -102,7 +102,7 @@ function HybridHero() {
           className="text-[14px] font-medium mb-4 font-mono tracking-[0.3em] uppercase"
           style={{ color: ACCENT }}
         >
-          {lang === "zh" ? "新一代 · 外汇量化" : "NEW · FOREX QUANT"}
+          {lang === "zh" ? "新一代 · 量化交易" : "NEW · FOREX QUANT"}
         </motion.p>
         <motion.h1
           initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -125,14 +125,14 @@ function HybridHero() {
             WebkitTextFillColor: "transparent",
           }}
         >
-          {lang === "zh" ? "重塑外汇，自动交易" : "Reshape FX · Automate everything"}
+          {lang === "zh" ? "重塑交易，自动交易" : "Reshape FX · Automate everything"}
         </motion.h2>
         <motion.p
           initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.25 }}
           className="mt-6 text-[19px] text-white/75 max-w-xl mx-auto leading-relaxed"
         >
           {lang === "zh"
-            ? "顶级 EA 策略、MT4/MT5 指标与 CG 合作平台支持，一站式专业级外汇量化方案。"
+            ? "顶级 EA 策略、MT4/MT5 指标与 CG 合作平台支持，一站式专业级量化方案。"
             : "Pro-grade EAs, MT4/MT5 indicators and partner broker support."}
         </motion.p>
         <motion.div

@@ -96,7 +96,7 @@ function AppleHero() {
         className="text-[14px] font-medium mb-4"
         style={{ color: BLUE }}
       >
-        {lang === "zh" ? "新一代 外汇量化" : "New · Forex Quant"}
+        {lang === "zh" ? "新一代 量化交易" : "New · Forex Quant"}
       </motion.p>
       <motion.h1
         initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
@@ -112,7 +112,7 @@ function AppleHero() {
         className="mt-2 font-semibold tracking-tight text-black/70"
         style={{ fontSize: "clamp(30px, 4.5vw, 52px)", letterSpacing: "-0.02em", lineHeight: 1.05 }}
       >
-        {lang === "zh" ? "重塑外汇，自动交易" : "Reshape FX · Automate everything"}
+        {lang === "zh" ? "重塑交易，自动交易" : "Reshape FX · Automate everything"}
       </motion.h2>
       <motion.p
         initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ duration: 0.7, delay: 0.25 }}

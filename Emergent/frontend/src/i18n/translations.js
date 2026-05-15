@@ -12,7 +12,7 @@ export const translations = {
     hero: {
       tagline: "FOREX · QUANTITATIVE · AUTOMATION",
       title1: "无限量化",
-      title2: "重塑外汇",
+      title2: "重塑交易",
       title3: "自动交易",
       subtitle:
         "顶级 EA 策略 · MT4/MT5 · CG 合作平台 · 黄金 XAUUSD / COMEX 量化解决方案",
@@ -38,7 +38,7 @@ export const translations = {
       faqs: [
         { q: "合作需要多少资金？", a: "起步资金建议 $100；专业级策略与风控建议 $1,000 起。" },
         { q: "出入金周期？", a: "工作日入金实时到账，出金一般 1-3 个工作日。" },
-        { q: "支持哪些交易品种？", a: "外汇、XAUUSD 黄金、COMEX 期货、指数与原油。" },
+        { q: "支持哪些交易品种？", a: "货币对、贵金属、指数、原油、数字货币。" },
         { q: "是否支持自己的 EA？", a: "支持，CG 提供低延迟 MT4/MT5 与 VPS 一键部署。" },
       ],
       scan: "咨询合作",
@@ -96,7 +96,7 @@ export const translations = {
       label: "ABOUT & JOIN",
       title: "关于我们 · 加入无限",
       subtitle:
-        "我们是一支由外汇量化工程师、前投行交易员与展览展示级 UI 工程师组成的团队。",
+        "我们是一支由量化工程师、前投行交易员与展览展示级 UI 工程师组成的团队。",
       benefitsTitle: "加入我们的好处",
       benefits: [
         { t: "策略共享", d: "全部 EA、指标、风控模型开放给核心成员。" },
@@ -117,7 +117,7 @@ export const translations = {
     footer: {
       rights: "版权所有",
       disclaimer:
-        "外汇保证金交易涉及重大风险，可能导致资金损失。本站内容仅供参考，不构成投资建议。",
+        "保证金交易涉及重大风险，可能导致资金损失。本站内容仅供参考，不构成投资建议。",
     },
     toast: {
       success: "提交成功！我们会尽快联系你。",
