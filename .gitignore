@@ -41,3 +41,16 @@ generate_mock_2026_ticks.py
 
 # Temporary scraping artifacts
 eahub_*.html
+
+# Python (show-thumb / game backend)
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+game/backend/.venv/
+game/deploy/local_deploy_proxy.log
+game/deploy/proxy-dev*

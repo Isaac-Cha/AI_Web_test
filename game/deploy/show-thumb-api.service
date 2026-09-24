@@ -1,0 +1,51 @@
+# ============ systemd: 办二游戏后端独立服务 ============
+# 复制到: /etc/systemd/system/show-thumb-api.service
+# 执行: sudo systemctl daemon-reload && sudo systemctl enable --now show-thumb-api.service
+# 注意: 进程 100% 独立，零侵入 emergent-api.service (:8000)
+
+[Unit]
+Description=Show Thumb (办二) Game Backend API + WebSocket (isolated)
+Documentation=file:///www/wwwroot/cg-fintech.com/game-backend/README.md
+After=network-online.target mongod.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=www
+Group=www
+WorkingDirectory=/www/wwwroot/cg-fintech.com/game-backend
+Environment=PYTHONDONTWRITEBYTECODE=1
+Environment=PYTHONUNBUFFERED=1
+# 虚拟环境路径（如不用 venv 就改成系统 python3）
+Environment=PATH=/opt/venvs/show-thumb/bin:/usr/local/bin:/usr/bin:/bin
+ExecStart=/opt/venvs/show-thumb/bin/uvicorn game.backend.server:app \
+            --host 127.0.0.1 --port 8001 \
+            --workers 1 \
+            --log-level info
+
+# 安全加固（Sandbox）
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/www/wwwroot/cg-fintech.com/game-backend /tmp
+# 允许网络
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectControlGroups=true
+RestrictRealtime=true
+LockPersonality=true
+MemoryDenyWriteExecute=false
+
+Restart=on-failure
+RestartSec=2s
+StartLimitBurst=5
+StartLimitInterval=20s
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=show-thumb-api
+
+[Install]
+WantedBy=multi-user.target
