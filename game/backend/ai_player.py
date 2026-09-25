@@ -5,6 +5,7 @@ import asyncio
 import logging
 import os
 import random
+import time
 from typing import Dict, List, Optional
 
 from . import card_utils as cu
@@ -69,12 +70,27 @@ async def maybe_trigger_ai_actions(room) -> None:
                     break
         return
 
-    # --- settlement：若有 AI，自动点下一局（继续玩，除非连续 10 局以上先由外部控制）
-    if seat is None and phase == "settlement":
-        # 至少有一名 AI 的话由第一个 AI 点下一局（凑不齐人时AI陪练用）
-        ai_seats = [s for s, p in state.players.items() if p.is_ai]
-        if ai_seats and state.round_number < 3:  # 限制：AI 最多连打 3 局自动下一局，避免无限循环
-            seat = ai_seats[0]
+    # --- settlement：AI 玩家自动点击「准备」（不再直接 do_next_round）
+    if phase == "settlement":
+        changed = False
+        async with room.lock:
+            if state.phase == "settlement":
+                for s, p in state.players.items():
+                    if p.is_ai and s not in state.ready_seats:
+                        ge.mark_ready(state, s)
+                        changed = True
+                # 兜底超时：真人 30s 未全 ready / 全AI 房间 5s → 强制 next_round
+                started_at = state.settlement_started_at or 0.0
+                if started_at > 0 and state.phase == "settlement":
+                    now = time.time()
+                    has_human = any(not p.is_ai for p in state.players.values())
+                    timeout = 30.0 if has_human else 5.0
+                    if now - started_at >= timeout:
+                        ge.do_next_round(state)
+                        changed = True
+        if changed:
+            await room.broadcast_state()
+        return
 
     if seat is None:
         return
@@ -144,8 +160,9 @@ async def _execute_ai_action(room, seat: int) -> None:
             for _ in range(6):
                 ge.do_reveal_next(state)
         elif phase == "settlement":
-            # AI 点下一局
-            ge.do_next_round(state)
+            # AI 标记为 ready（由 mark_ready 判断是否全员 ready → next_round）
+            if seat not in state.ready_seats:
+                ge.mark_ready(state, seat)
     except Exception as e:  # noqa: BLE001
         log.warning(f"AI seat{seat} action error phase={phase}: {e}")
 
@@ -266,22 +283,18 @@ async def _maybe_do_tribute_return_ai(room) -> None:
             p = state.players[s]
             if not p.is_ai:
                 continue
-            # 还没操作的才做
+            # 还没操作的才做；need==0 也要触发（标记 decline 并推进 _try_apply_exchange）
             if s == banker_s:
                 if state.banker_decline:
                     continue
                 need = len(state.cards_to_banker)
-                if need == 0:
-                    continue
-                if len(state.return_from_banker) == need:
+                if need > 0 and len(state.return_from_banker) == need:
                     continue
             else:
                 if state.banker_partner_decline:
                     continue
                 need = len(state.cards_to_banker_partner)
-                if need == 0:
-                    continue
-                if len(state.return_from_banker_partner) == need:
+                if need > 0 and len(state.return_from_banker_partner) == need:
                     continue
             await _sleep_random()
             _ai_do_return_side(state, s)

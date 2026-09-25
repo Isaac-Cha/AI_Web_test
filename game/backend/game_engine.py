@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import logging
 import random
+import time
 import uuid
 from typing import Dict, List, Optional, Tuple, TYPE_CHECKING
 
@@ -825,6 +826,8 @@ def _settle_round(state: GameState) -> None:
         ROOMS.try_persist_round(state.room_id)
     except Exception as e:  # noqa: BLE001
         log.warning(f"try_persist_round hook failed: {e}")
+    state.ready_seats = []
+    state.settlement_started_at = time.time()
     state.log(
         f"📊 第 {state.round_number} 局结算：副家得 {score} 分 / 底牌{state.bottom_score}分"
         f"{'底牌分+' if state.bottom_captured else ''} → 下局上供 {tribute_count} 张，"
@@ -834,9 +837,33 @@ def _settle_round(state: GameState) -> None:
     state.touch()
 
 
+def mark_ready(state: GameState, seat: int) -> None:
+    """settlement 阶段：真人玩家点击准备。AI 玩家自动 ready。
+    当所有真人玩家都 ready 后 → 立即进入下一局。
+    """
+    if state.phase != "settlement":
+        return
+    if seat not in state.players:
+        return
+    if seat not in state.ready_seats:
+        state.ready_seats.append(seat)
+    # 检查：所有真人都已 ready
+    all_human_ready = True
+    for s, p in state.players.items():
+        if not p.is_ai and s not in state.ready_seats:
+            all_human_ready = False
+            break
+    if all_human_ready:
+        do_next_round(state)
+    state.touch()
+
+
 def do_next_round(state: GameState) -> None:
     if state.phase != "settlement":
         raise ValueError("当前不能进入下一局")
+    # 清空准备态，避免下一局 settlement 时残留
+    state.ready_seats = []
+    state.settlement_started_at = 0.0
     state.round_number += 1
     _begin_round(state, is_first_round=False)
 
@@ -877,18 +904,30 @@ def mask_state_for_viewer(state: GameState, viewer_seat: Optional[int]) -> GameS
         else:
             # reveal_bottom: 只展示已翻到 reveal_flip_index 的
             masked.bottom_cards = masked.bottom_cards[:masked.reveal_flip_index]
+    def _face_down_cards(cards):
+        """保留张数，每张 Card 变成背面形式（不泄露牌面内容）。"""
+        from copy import deepcopy as _dc
+        result = []
+        for c in cards:
+            nc = _dc(c)
+            object.__setattr__(nc, 'suit', 'joker')
+            object.__setattr__(nc, 'rank', 'small')
+            object.__setattr__(nc, 'id', f'back_{c.id}')
+            result.append(nc)
+        return result
+
     # 上供牌面：
     # - tribute_select：仅 giver 及其对家 可见 tribute_cards
     if masked.phase == "tribute_select":
         if viewer_seat is None or viewer_seat not in (masked.tribute_giver, masked.tribute_giver_partner):
             masked.tribute_cards = []
-    # - tribute_distribute：仅 distributor（giver_partner）可见全部
+    # - tribute_distribute：仅 distributor（giver_partner）可见全部；其他玩家看到背面（保留张数）
     if masked.phase == "tribute_distribute":
         if viewer_seat != masked.tribute_giver_partner:
-            masked.tribute_cards = []
+            masked.tribute_cards = _face_down_cards(masked.tribute_cards)
     # - tribute_return：
-    #   cards_to_banker → banker 可见
-    #   cards_to_banker_partner → banker_partner 可见
+    #   cards_to_banker → banker 可见；其他玩家看到背面（保留张数）
+    #   cards_to_banker_partner → banker_partner 可见；其他玩家看到背面（保留张数）
     #   双方都不可见对方具体牌面，但数量可见
     if masked.phase == "tribute_return":
         bs = masked.banker_seat
@@ -897,11 +936,11 @@ def mask_state_for_viewer(state: GameState, viewer_seat: Optional[int]) -> GameS
         if viewer_seat not in (masked.tribute_giver, masked.tribute_giver_partner):
             masked.tribute_cards = []
         if viewer_seat != bs:
-            masked.cards_to_banker = []
-            masked.return_from_banker = []
+            masked.cards_to_banker = _face_down_cards(masked.cards_to_banker)
+            masked.return_from_banker = _face_down_cards(masked.return_from_banker)
         if viewer_seat != bps:
-            masked.cards_to_banker_partner = []
-            masked.return_from_banker_partner = []
+            masked.cards_to_banker_partner = _face_down_cards(masked.cards_to_banker_partner)
+            masked.return_from_banker_partner = _face_down_cards(masked.return_from_banker_partner)
     return masked
 
 

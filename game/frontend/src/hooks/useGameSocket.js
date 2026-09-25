@@ -145,7 +145,7 @@ const connect = useCallback(() => {
     return true;
   }, []);
 
-  /** 15 种业务动作封装（与 routes_ws.py:29-113 对应） */
+  /** 业务动作封装（与 routes_ws.py 对应） */
   const actions = useMemo(() => ({
     start: () => send("start_game"),
     drawCard: () => send("draw_card"),
@@ -158,6 +158,7 @@ const connect = useCallback(() => {
     declineCards: () => send("decline_cards"),
     playCards: (cardIds) => send("play_cards", { card_ids: cardIds }),
     revealNext: () => send("reveal_next"),
+    ready: () => send("ready"),
     nextRound: () => send("next_round"),
     leaveRoom: () => send("leave_room"),
   }), [send]);

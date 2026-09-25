@@ -2,6 +2,7 @@ import React from "react";
 import PlayingCard from "./PlayingCard";
 import { cn, cardScore, SUIT_SYMBOL } from "@/utils/cardUtils";
 import { Trophy, User, Users } from "lucide-react";
+import PHASE_ZH from "@/config/phases";
 
 /**
  * 状态栏：轮次、阶段、当前主花色、庄家信息、分数、上供张数、当前出牌人
@@ -59,15 +60,4 @@ export default function StatusBar({ state, viewerSeat, myTurn }) {
   );
 }
 
-const PHASE_ZH = {
-  waiting: "等待开始",
-  drawing: "摸牌（可办二）",
-  flip_bottom: "翻底定主",
-  discard_bottom: "扣底 6 张",
-  tribute_select: "上供选牌（最大 N 张主非分）",
-  tribute_distribute: "庄家分配上供牌给对家",
-  tribute_return: "还牌（庄家对家各 N 张，对家花色互不相同）",
-  playing: "出牌阶段",
-  reveal_bottom: "翻底牌阶段",
-  settlement: "结算",
-};
+

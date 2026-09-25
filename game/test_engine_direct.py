@@ -1,212 +1,91 @@
-# 直接内存调用（不经过 WS）测试 start → drawing → discard → ... → settlement，看是否推进
-import asyncio, sys, os, traceback
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from game.backend import game_engine as ge, ai_player, card_utils as cu
-from game.backend.room_manager import Room
+from __future__ import annotations
 
-async def main():
-    os.environ["GAME_AI_MIN_DELAY_MS"]="0"
-    os.environ["GAME_AI_MAX_DELAY_MS"]="1"
-    # 不经过 manager，手动构建 room+state（按 routes_http.create_room 逻辑）
-    state = ge.create_new_room()
-    room = Room(state)
-    my_seat, my_pid = ge.add_player(state, "直测P1", seat_hint=0)
-    ai_names = ["AI-左", "AI-对", "AI-右"]
-    remaining = [s for s in (1, 2, 3) if s not in state.players]
-    for i, s in enumerate(remaining):
-        ge.add_player(state, ai_names[i], seat_hint=s, is_ai=True)
-    print("room_id=", state.room_id, "my seat=", my_seat, "players", [(s, p.name, "AI" if p.is_ai else "HUMAN") for s,p in state.players.items()])
+from .backend.card_utils import (
+    Card,
+    validate_follow_cards,
+    cards_of_suit_in_hand,
+)
 
-    # 开局
-    async with room.lock:
-        ge.start_game(state)
-    await room.broadcast_state()
-    last_phase = state.phase
-    last_def = state.defender_total_score
-    last_current = state.current_seat
-    seen = {last_phase}
-    MAX = 2000
-    for i in range(MAX):
-        phase = state.phase
-        cur = state.current_seat
-        hum = my_seat
-        banker = state.banker_seat
-        me_obj = state.players[hum]
-        myhand = list(me_obj.hand)
-        action_taken = False
-        async with room.lock:
-            if phase == "drawing" and cur == hum:
-                ge.do_draw_card(state, hum); action_taken=True
-            elif phase == "flip_bottom" and cur in (None, -1):
-                # 翻底：让真人（如果副家）翻；否则继续
-                try:
-                    flipper = cur
-                    if flipper in (None, -1):
-                        # 找任意一个非庄家副家 seat（这里用 hum）
-                        flipper = hum
-                    ge.do_flip_bottom(state, flipper); action_taken=True
-                except ValueError as e:
-                    # 可能是庄家队不能主动翻（如果当前逻辑禁止）
-                    pass
-            elif phase == "discard_bottom" and banker == hum:
-                tr = state.trump_suit
-                sorted_c = sorted(myhand, key=lambda c: (
-                    0 if (not c.is_trump_of(tr) and c.rank not in ["5","10","K"]) else 1,
-                    -cu.side_value(c) if not c.is_trump_of(tr) else -cu.trump_value(c, tr, strict=True)
-                ))
-                ids = [c.id for c in sorted_c[:6]]
-                if len(ids)==6:
-                    ge.do_discard_bottom(state, hum, ids); action_taken=True
-            elif phase == "tribute_select" and hum == state.tribute_giver:
-                N = state.tribute_count or 0
-                t = state.trump_suit
-                eligible = [c for c in myhand if c.is_trump_of(t) and c.rank not in ["5","10","K"]]
-                eligible.sort(key=lambda c: -cu.trump_value(c, t, strict=True))
-                ids = [c.id for c in eligible[:N]]
-                if len(ids)==N:
-                    ge.do_select_tribute(state, hum, ids); action_taken=True
-            elif phase == "tribute_distribute" and hum == state.tribute_giver_partner:
-                dist = dict(state.tribute_distribution)
-                sel = list(state.tribute_cards) or []
-                bnk = state.banker_seat
-                partner = state.banker_partner_seat
-                sent_out = {}
-                for idx, c in enumerate(sel):
-                    if str(c.id) in dist: continue
-                    # 均分：如果 len(sel)==1 默认给 banker
-                    sent_out[str(c.id)] = bnk if idx < (len(sel)+1)//2 else partner
-                if sent_out:
-                    ge.do_distribute_tribute(state, hum, sent_out); action_taken=True
-                else:
-                    ge.do_distribute_tribute(state, hum, {}); action_taken=True
-            elif phase == "tribute_return" and hum in (banker, state.banker_partner_seat):
-                tr = state.trump_suit
-                if hum == banker:
-                    N = len(state.cards_to_banker)
-                else:
-                    N = len(state.cards_to_banker_partner)
-                if N <= 0:
-                    # 直接 skip 也可以，但不选择会卡住。如果 N=0 说明不用还牌，engine 应该会自动跳过？
-                    # 保险：decline = True 直接告诉 engine 跳过，这里不处理
-                    pass
-                if hum == state.banker_partner_seat:
-                    suits=set(); picks=[]
-                    # 庄家对家：优先不同花色的最小非主非分
-                    rk = {"2":120,"A":110,"K":100,"Q":90,"J":80,"10":70,"9":60,"8":50,"7":40,"6":30,"5":20,"4":10,"3":0}
-                    candidate = sorted(myhand, key=lambda c: (
-                        1 if (c.is_trump_of(tr) or c.rank in ["5","10","K"]) else 0,
-                        rk.get(c.rank, 0)
-                    ))
-                    for c in candidate:
-                        if c.is_trump_of(tr) or c.rank in ["5","10","K"]: continue
-                        s = c.suit.name if hasattr(c.suit,"name") else str(c.suit)
-                        if s == "joker": continue
-                        if c.suit not in suits:
-                            suits.add(c.suit); picks.append(c)
-                        if len(picks) >= N: break
-                    if len(picks) < N:
-                        # 实在不够，再从合格的（非主非分）里随便补（同花色也没关系，尽量满足张数）
-                        for c in candidate:
-                            if c in picks: continue
-                            if c.is_trump_of(tr) or c.rank in ["5","10","K"]: continue
-                            if c.suit == "joker": continue
-                            picks.append(c)
-                            if len(picks) >= N: break
-                    if len(picks) >= N:
-                        ge.do_select_return(state, hum, [c.id for c in picks[:N]]); action_taken=True
-                else:
-                    rk = {"2":120,"A":110,"K":100,"Q":90,"J":80,"10":70,"9":60,"8":50,"7":40,"6":30,"5":20,"4":10,"3":0}
-                    cand = sorted(myhand, key=lambda c: (
-                        1 if (c.is_trump_of(tr) or c.rank in ["5","10","K"]) else 0,
-                        rk.get(c.rank, 0)
-                    ))
-                    valid = [c for c in cand if not c.is_trump_of(tr) and c.rank not in ["5","10","K"] and c.suit != "joker"]
-                    if len(valid) >= N:
-                        ge.do_select_return(state, hum, [c.id for c in valid[:N]]); action_taken=True
-            elif phase == "playing" and cur == hum:
-                tr = state.trump_suit
-                ct = state.current_trick
-                isTrump = lambda c: (c.suit=="joker" or c.rank=="2" or (tr and c.suit==tr))
-                rkSide = {"2":120,"A":110,"K":100,"Q":90,"J":80,"10":70,"9":60,"8":50,"7":40,"6":30,"5":20,"4":10,"3":0}
-                rkTrump = {"3":0,"4":10,"6":30,"7":40,"8":50,"9":60,"10":70,"J":80,"Q":90,"K":100,"A":110,"2":700,"small":800,"big":900,"5":1000}
-                # Trick 字段：cards_played / played_order / is_all_trump / lead_suit（注意：没有 lead_cards）
-                leadCards = []
-                if ct and ct.played_order:
-                    leaderSeat = ct.played_order[0]
-                    leadCards = list(ct.cards_played.get(leaderSeat, []))
-                N = len(leadCards)
-                if not ct or not ct.played_order or N == 0:
-                    # 领出
-                    sides = [c for c in myhand if not isTrump(c)]
-                    if sides:
-                        sides.sort(key=lambda c: rkSide.get(c.rank, 0))
-                        ge.do_play_cards(state, hum, [sides[0].id]); action_taken=True
-                    else:
-                        cand = sorted(myhand, key=lambda c: rkTrump.get(c.rank, 0))
-                        ge.do_play_cards(state, hum, [cand[0].id]); action_taken=True
-                else:
-                    # 跟牌：根据 validate_follow_cards 规则选出合法 N 张
-                    allTrumpLead = ct.is_all_trump
-                    if not allTrumpLead:
-                        ls = ct.lead_suit
-                        sameSuitSide = [c for c in myhand if c.suit==ls and not isTrump(c)]
-                        if len(sameSuitSide) >= N:
-                            sameSuitSide.sort(key=lambda c: rkSide.get(c.rank, 0))
-                            ge.do_play_cards(state, hum, [c.id for c in sameSuitSide[:N]]); action_taken=True
-                        else:
-                            allSorted = sorted(myhand, key=lambda c: (
-                                100000 + rkTrump.get(c.rank, 0) if isTrump(c) else rkSide.get(c.rank, 0)
-                            ))
-                            ge.do_play_cards(state, hum, [c.id for c in allSorted[:N]]); action_taken=True
-                    else:
-                        trumps = [c for c in myhand if isTrump(c)]
-                        if len(trumps) >= N:
-                            trumps.sort(key=lambda c: rkTrump.get(c.rank, 0))
-                            ge.do_play_cards(state, hum, [c.id for c in trumps[:N]]); action_taken=True
-                        else:
-                            allSorted = sorted(myhand, key=lambda c: (
-                                rkTrump.get(c.rank, 0) if isTrump(c) else -1000 + rkSide.get(c.rank, 0)
-                            ))
-                            ge.do_play_cards(state, hum, [c.id for c in allSorted[:N]]); action_taken=True
-            elif phase == "reveal_bottom":
-                try: ge.do_reveal_next(state); action_taken=True
-                except ValueError: pass
-            elif phase == "settlement":
-                if state.round_number < 3:
-                    ge.do_next_round(state); action_taken=True
-                else:
-                    print("FINISHED at round", state.round_number)
-                    break
-        if action_taken:
-            await room.broadcast_state()
 
-        # AI 驱动
-        await ai_player.maybe_trigger_ai_actions(room)
-        await room.broadcast_state()
-        # reveal_bottom settlement 自动兜底（同 routes_ws）
-        if state.phase == "reveal_bottom":
-            async with room.lock:
-                for _ in range(6):
-                    ge.do_reveal_next(state)
-                    if state.phase != "reveal_bottom": break
-            await room.broadcast_state()
-            if state.phase == "settlement":
-                await ai_player.maybe_trigger_ai_actions(room)
-                await room.broadcast_state()
-        phase = state.phase
-        def_score = state.defender_total_score
-        hands = [p.hand_count for p in state.players.values()]
-        cur = state.current_seat
-        if phase != last_phase or def_score != last_def or cur != last_current or (i % 50 == 0):
-            print(f"[{i:4d}] phase={phase:20s}  def={def_score:3d}  hands={hands}  current={cur}  tricks={len(state.tricks_history)}  banker={state.banker_seat}")
-            last_phase = phase; last_def = def_score; last_current = cur; seen.add(phase)
-        if phase == "settlement" and state.prev_result is not None:
-            rr = state.prev_result
-            print("\nRound", state.round_number - 1, "RESULT:")
-            for k,v in rr.model_dump(mode="python").items(): print(f"  {k}: {v}")
-            if state.round_number > 3:
-                break
-    print("\nseen phases:", sorted(seen))
+def _c(suit: str, rank: str) -> Card:
+    return Card(suit=suit, rank=rank)
+
+
+def test_follow_suit_includes_rank2_副2必须算进同花跟牌池():
+    trump: str = "spade"
+
+    leader_card = _c("club", "3")
+
+    follower_hand = [
+        _c("club", "2"),       # 梅花2（副2）— 规则：必须算"梅花"跟牌池
+        _c("heart", "5"),
+        _c("heart", "7"),
+    ]
+
+    suit_pool = cards_of_suit_in_hand(follower_hand, "club", trump, trump_as_suit=False)
+    assert len(suit_pool) == 1 and suit_pool[0].rank == "2", (
+        f"cards_of_suit_in_hand 应包含梅花2（副2），实际 len={len(suit_pool)}"
+    )
+
+    # 合法：跟牌梅花2
+    ok, err = validate_follow_cards([leader_card], [_c("club", "2")], follower_hand, trump)
+    assert ok, f"跟牌选梅花2应该合法，错误：{err}"
+
+    # 非法：有梅花2却垫红桃
+    ok, err = validate_follow_cards([leader_card], [_c("heart", "5")], follower_hand, trump)
+    assert not ok and "必须跟" in err, (
+        f"有梅花2时垫红桃应被拒绝，实际 ok={ok} err={err}"
+    )
+
+
+def test_follow_suit_only_side2_exists_手中只有副2没有副牌必须出副2():
+    trump: str = "spade"
+    leader_card = _c("club", "3")
+
+    follower_hand = [_c("club", "2"), _c("heart", "A"), _c("diamond", "A")]
+    ok, err = validate_follow_cards([leader_card], [_c("heart", "A")], follower_hand, trump)
+    assert not ok, f"只有一张梅花2也必须跟梅花2，实际 ok={ok}"
+
+
+def test_follow_suit_副2_plus_普通牌都有时必须跟_suit匹配即可():
+    trump: str = "spade"
+    leader_card = _c("club", "3")
+
+    follower_hand = [_c("club", "2"), _c("club", "5"), _c("heart", "K")]
+    suit_pool = cards_of_suit_in_hand(follower_hand, "club", trump, trump_as_suit=False)
+    assert len(suit_pool) == 2, f"梅花2和梅花5都应算梅花池，len={len(suit_pool)}"
+
+    # 跟梅花5（普通）合法
+    ok, _ = validate_follow_cards([leader_card], [_c("club", "5")], follower_hand, trump)
+    assert ok, "跟梅花5合法"
+
+    # 跟梅花2（副2）合法
+    ok, _ = validate_follow_cards([leader_card], [_c("club", "2")], follower_hand, trump)
+    assert ok, "跟梅花2也合法（副2算同花色）"
+
+    # 垫红桃非法
+    ok, err = validate_follow_cards([leader_card], [_c("heart", "K")], follower_hand, trump)
+    assert not ok, f"有梅花2+梅花5，垫红桃应被拒绝：err={err}"
+
+
+def test_follow_no_suit可垫任意():
+    trump: str = "spade"
+    leader_card = _c("club", "3")
+    follower_hand = [_c("heart", "4"), _c("heart", "5"), _c("diamond", "6"),
+                     _c("spade", "A")]
+    ok, _ = validate_follow_cards([leader_card], [_c("heart", "4")], follower_hand, trump)
+    assert ok, "没梅花时可以垫红桃"
+    ok, _ = validate_follow_cards([leader_card], [_c("spade", "A")], follower_hand, trump)
+    assert ok, "没梅花时主牌杀合法"
+
 
 if __name__ == "__main__":
-    asyncio.run(main())
+    test_follow_suit_includes_rank2_副2必须算进同花跟牌池()
+    print("PASS: 副2算进同花跟牌池 & 必须跟梅花2")
+    test_follow_suit_only_side2_exists_手中只有副2没有副牌必须出副2()
+    print("PASS: 手上只有副2也必须出")
+    test_follow_suit_副2_plus_普通牌都有时必须跟_suit匹配即可()
+    print("PASS: 副2+普通都有 必须跟 suit")
+    test_follow_no_suit可垫任意()
+    print("PASS: 没该花色可垫任意")
+    print("\nALL 4 TEST ENGINE DIRECT CASES PASSED")

@@ -39,29 +39,48 @@ export default function ActionButtons({
     );
   }
 
-  // settlement：显示结果 + 下一局
+  // settlement：准备按钮 + 已准备计数（不再直接下一局）
   if (phase === "settlement") {
     const pr = state.prev_result;
+    const readySeats = Array.isArray(state.ready_seats) ? state.ready_seats : [];
+    const humanPlayers = (state.players || []).filter(p => !p.is_ai);
+    const humanTotal = humanPlayers.length || 1;
+    const humanReady = humanPlayers.filter(p => readySeats.includes(p.seat)).length;
+    const isReady = readySeats.includes(viewerSeat);
+    const allHumanReady = humanReady >= humanTotal;
     return (
       <div className="panel p-3 md:p-4 flex flex-wrap gap-2 items-center justify-between">
-        <div className="text-sm">
-          <span className="chip bg-amber-500/20 text-amber-200 mr-2">
-            <Crown className="w-3 h-3 inline mr-1" />结算
+        <div className="text-sm flex flex-wrap items-center gap-2">
+          <span className="chip bg-amber-500/20 text-amber-200">
+            <Crown className="w-3 h-3 inline mr-1" />第 {state.round_number} 轮结算
           </span>
-          {(pr?.tribute_count ?? 0) > 0
-            ? `下一轮：上供 ${pr?.tribute_count ?? 0} 张，换庄=${pr?.change_banker ? "是" : "否"}`
-            : pr?.change_banker ? "下一轮：换庄继续" : "下一轮：不换庄，继续"}
+          <span className="text-white/80">
+            {(pr?.tribute_count ?? 0) > 0
+              ? `下一轮：上供 ${pr?.tribute_count ?? 0} 张 · 换庄=${pr?.change_banker ? "是" : "否"}`
+              : pr?.change_banker ? "下一轮：换庄继续" : "下一轮：不换庄，继续"}
+          </span>
+          <span className="chip bg-emerald-500/20 text-emerald-200">
+            已准备 {humanReady}/{humanTotal}（AI 自动准备）
+          </span>
+          {!allHumanReady && (
+            <span className="text-xs text-white/50">30 秒未准备完自动开</span>
+          )}
         </div>
-        <button className="btn btn-primary" onClick={actions.nextRound} disabled={disabled}>
-          <ArrowRightCircle className="w-4 h-4" /> 下一局
+        <button
+          className={isReady ? "btn btn-success opacity-80" : "btn btn-primary"}
+          onClick={actions.ready}
+          disabled={disabled || isReady}
+        >
+          <CheckCircle className="w-4 h-4" /> {isReady ? "已准备 ✓" : "准备"}
         </button>
       </div>
     );
   }
 
-  // drawing：当前座位摸牌；手持「2」可办二（按钮根据选中）
+  // drawing：当前座位摸牌；手持「2」可办二（按钮根据选中；无 2 则不渲染办二 DOM）
   if (phase === "drawing") {
     const sel2 = viewerHand.find(c => selectedIds.includes(c.id) && c.rank === "2" && !c.is_joker);
+    const hasRank2 = viewerHand.some(c => c.rank === "2" && !c.is_joker);
     return (
       <div className="panel p-3 md:p-4 flex flex-wrap gap-2 items-center">
         <button
@@ -71,14 +90,15 @@ export default function ActionButtons({
         >
           <Plus className="w-4 h-4" /> 摸牌（顺序）
         </button>
-        <button
-          className="btn btn-info"
-          onClick={() => sel2 && actions.declareBan2(sel2.id)}
-          disabled={disabled || !sel2 || !isCurrentSeat}
-          title="选中手牌里的一张 2 来办二"
-        >
-          <Sparkles className="w-4 h-4" /> 办二（当前选中：{sel2 ? "2" + (sel2.suit ? "" : "") : "请选 1 张 2"}）
-        </button>
+        {hasRank2 && (
+          <button
+            className="btn btn-info"
+            onClick={() => sel2 && actions.declareBan2(sel2.id)}
+            disabled={disabled || !sel2 || !isCurrentSeat}
+          >
+            <Sparkles className="w-4 h-4" /> 办二{sel2 ? `（已选 2${sel2.suit ? ` · ${sel2.suit}` : ""}）` : "（请先选 1 张 2）"}
+          </button>
+        )}
       </div>
     );
   }

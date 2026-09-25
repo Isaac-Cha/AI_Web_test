@@ -178,6 +178,8 @@ async def _handle_message(room, viewer_seat: int, msg: WSMessageIn) -> None:
                 ge.do_play_cards(state, viewer_seat, list(cids))
             elif action == "reveal_next":
                 ge.do_reveal_next(state)
+            elif action == "ready":
+                ge.mark_ready(state, viewer_seat)
             elif action == "next_round":
                 ge.do_next_round(state)
             else:

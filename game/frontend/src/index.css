@@ -86,28 +86,51 @@ body {
 .hand-wrap {
   perspective: 1200px;
 }
+
+/* ===== T9 响应式断点 ===== */
+
+/* 1. 小屏笔记本（1366×768 档）：用户原 complain 缩到 67% 才能看全 */
+@media (min-width: 1024px) and (max-width: 1440px) {
+  .card {
+    width: 3.7rem;
+    height: 5.2rem;
+    padding: 0.28rem 0.38rem;
+  }
+  .card-selected {
+    transform: translateY(-1rem);
+  }
+  .poker-table {
+    min-height: 560px !important;
+  }
+  .poker-table .hand-wrap {
+    transform: scale(0.92);
+    transform-origin: center bottom;
+  }
+}
+
+/* 2. 手机横屏（≤900px landscape）：加强缩放，允许滚动 */
 @media (orientation: landscape) and (max-width: 900px) {
   .card {
-    --scale-landscape: 0.82;
-    transform: scale(var(--scale-landscape));
-    transform-origin: center bottom;
+    width: 3.3rem;
+    height: 4.7rem;
+    padding: 0.25rem 0.33rem;
   }
-  .card.card-selected {
-    transform: translateY(-1.0rem) scale(0.82);
+  .card-selected {
+    transform: translateY(-0.85rem);
   }
   .hand-wrap {
-    transform: scale(0.88);
+    transform: scale(0.85);
     transform-origin: center bottom;
   }
+  .poker-table {
+    min-height: 440px !important;
+  }
   .panel {
-    padding: 0.4rem !important;
+    padding: 0.35rem !important;
   }
   .chip {
     font-size: 10px;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
-    padding-top: 0;
-    padding-bottom: 0;
+    padding: 0 0.45rem;
   }
   body {
     overflow: auto;
@@ -115,6 +138,23 @@ body {
   html, body, #root {
     height: auto;
     min-height: 100%;
+  }
+}
+
+/* 3. 手机竖屏（小屏 ≤430px）：允许滚动 + 缩小 card */
+@media (orientation: portrait) and (max-width: 480px) {
+  body { overflow: auto; }
+  html, body, #root { height: auto; min-height: 100%; }
+  .card {
+    width: 3.4rem;
+    height: 4.8rem;
+    padding: 0.25rem 0.33rem;
+  }
+  .card-selected {
+    transform: translateY(-0.9rem);
+  }
+  .poker-table {
+    min-height: 640px !important;
   }
 }
 

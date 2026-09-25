@@ -154,14 +154,15 @@ def cards_of_suit_in_hand(hand: Iterable[Card], suit: Suit, trump_suit: Optional
                           trump_as_suit: bool = False) -> List[Card]:
     """
     获取手牌中指定花色的牌。
-      - suit 是普通花色(spade/heart...) 且 trump_as_suit=False：只算该花色的副牌（不算主牌里的同花色，因为主牌是单独花色池）
       - trump_as_suit=True：算「主牌」作为一个整体池（此时 suit 参数被忽略，只返回 is_trump 的牌）
+      - trump_as_suit=False：取 suit 匹配且非大小王的牌（规则：只要花色相同的 2（副2）也算"同花跟牌"池，
+        跟牌约束中有同花色就必须跟同花色）
     """
     if trump_as_suit:
         return [c for c in hand if c.is_trump_of(trump_suit)]
     return [
         c for c in hand
-        if c.suit == suit and not c.is_trump_of(trump_suit)
+        if c.suit == suit and not c.is_joker
     ]
 
 
@@ -260,13 +261,13 @@ def validate_follow_cards(
         # 领出是某一副牌花色
         same_suit_in_hand = cards_of_suit_in_hand(follower_full_hand, lead_suit, trump_suit, trump_as_suit=False)
         if len(same_suit_in_hand) >= N:
-            # 必须出 N 张该副牌花色
+            # 必须出 N 张该花色（含该花色的 2（副2），规则：有同花色就必须跟同花色）
             same_suit_in_follow = [
                 c for c in follow_cards
-                if c.suit == lead_suit and not c.is_trump_of(trump_suit)
+                if c.suit == lead_suit and not c.is_joker
             ]
             if len(same_suit_in_follow) != N:
-                return False, f"有 ≥ {N} 张{_suit_name(lead_suit)}副牌，必须全部跟{_suit_name(lead_suit)}副牌"
+                return False, f"有 ≥ {N} 张{_suit_name(lead_suit)}，必须跟{_suit_name(lead_suit)}（含{_suit_name(lead_suit)}2）"
         # 否则任意出（垫或杀）
         return True, ""
     else:

@@ -225,6 +225,10 @@ class GameState(BaseModel):
     # ---- 当前操作用的提示（UI 展示）----
     prompt_for_seat: Dict[int, str] = Field(default_factory=dict)
 
+    # ---- settlement 准备阶段 ----
+    ready_seats: List[int] = Field(default_factory=list)
+    settlement_started_at: float = 0.0
+
     # ========== 便捷属性（使用 computed_field 以便 model_dump 序列化，修复 StatusBar 庄家 PNaN ==========
 
     @computed_field  # type: ignore[prop-decorator]

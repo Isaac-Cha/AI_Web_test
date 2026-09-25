@@ -50,7 +50,7 @@ export default function ResultModal({ state, onNext, onClose }) {
             收起
           </button>
           <button className="btn btn-primary" onClick={onNext}>
-            <RefreshCw className="w-4 h-4" /> 下一局
+            <RefreshCw className="w-4 h-4" /> 准备下一局
           </button>
         </div>
       </div>

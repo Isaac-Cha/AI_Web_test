@@ -32,7 +32,8 @@ print("Start:", state.phase, "round=", state.round_number, "current_seat=", stat
 async def run():
     steps = 0
     prev_phase = None
-    while state.phase != "settlement" and steps < 2000:
+    # 至少跑 2 局，验证 Round 2 hand_count 断言；Round 2 settlement 退出
+    while (state.phase != "settlement" or state.round_number < 2) and steps < 4000:
         steps += 1
         try:
             await maybe_trigger_ai_actions(room)
@@ -50,6 +51,14 @@ async def run():
             prev_phase = state.phase
             scores = [p.hand_count for p in state.players.values()]
             print(f"  [step {steps:4d}] phase={state.phase:22s}  tricks={len(state.tricks_history):2d}  hands={scores}  def_score={state.defender_total_score}")
+            # T2 验证：round>=2 时，hand_count 必须与真实手数一致
+            if state.round_number >= 2 and state.phase not in ("waiting", "settlement", "reveal_bottom"):
+                for s in range(4):
+                    p = state.players[s]
+                    assert p.hand_count == len(p.hand), (
+                        f"T2 FAIL seat{s} phase={state.phase}: hand_count={p.hand_count} "
+                        f"!= len(hand)={len(p.hand)}"
+                    )
         if steps % 300 == 0:
             print(f"    ... step {steps}: phase={state.phase}, current_seat={state.current_seat}")
             if state.current_trick:
