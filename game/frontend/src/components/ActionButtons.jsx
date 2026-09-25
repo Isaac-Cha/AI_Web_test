@@ -238,7 +238,7 @@ export default function ActionButtons({
     return (
       <div className="panel p-3 md:p-4 flex flex-wrap gap-2 items-center justify-between">
         <div className="text-sm text-white/80">
-          翻底牌（庄家队领出最后一手者一张一张翻；副家最后一手全主才可能抠底翻倍）
+          翻底牌（庄家队领出最后一手者一张一张翻）
         </div>
         <button className="btn btn-primary" onClick={actions.revealNext} disabled={disabled || !isCurrentSeat}>
           <FlipVertical className="w-4 h-4" /> 翻下一张

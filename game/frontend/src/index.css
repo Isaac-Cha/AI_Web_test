@@ -28,9 +28,10 @@ body {
 
 /* 扑克牌尺寸基准（相对单位便于响应式） */
 .card {
-  @apply relative inline-flex flex-col justify-between
+  @apply relative inline-flex flex-col justify-between items-stretch
          rounded-xl border border-black/30
-         bg-white text-poker-black shadow-card select-none;
+         bg-white text-poker-black shadow-card select-none
+         overflow-hidden;
   width: 4.4rem;
   height: 6.2rem;
   padding: 0.35rem 0.45rem;
@@ -50,8 +51,8 @@ body {
               0 0 14px 0 rgba(234,179,8,0.45);
 }
 .card-selected {
-  transform: translateY(-0.9rem);
-  box-shadow: 0 0 0 2px #a855f7 inset, 0 14px 22px rgba(0,0,0,0.45);
+  transform: translateY(-1.25rem);
+  box-shadow: 0 0 0 3px #10b981 inset, 0 16px 26px rgba(0,0,0,0.48);
 }
 .card-corner {
   display: flex;
@@ -59,19 +60,62 @@ body {
   align-items: flex-start;
   line-height: 1;
   font-weight: 800;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: clip;
+}
+.card-corner > * {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip;
 }
 .card-corner.br {
   transform: rotate(180deg);
   align-self: flex-end;
 }
 .card-center {
-  font-size: 1.6rem;
   text-align: center;
   font-weight: 800;
   opacity: 0.95;
+  line-height: 1;
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: clip;
 }
 .hand-wrap {
   perspective: 1200px;
+}
+@media (orientation: landscape) and (max-width: 900px) {
+  .card {
+    --scale-landscape: 0.82;
+    transform: scale(var(--scale-landscape));
+    transform-origin: center bottom;
+  }
+  .card.card-selected {
+    transform: translateY(-1.0rem) scale(0.82);
+  }
+  .hand-wrap {
+    transform: scale(0.88);
+    transform-origin: center bottom;
+  }
+  .panel {
+    padding: 0.4rem !important;
+  }
+  .chip {
+    font-size: 10px;
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  body {
+    overflow: auto;
+  }
+  html, body, #root {
+    height: auto;
+    min-height: 100%;
+  }
 }
 
 /* 按钮 */

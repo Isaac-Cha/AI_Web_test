@@ -186,6 +186,7 @@ class GameState(BaseModel):
 
     # ---- 主牌 ----
     trump_suit: Optional[Suit] = None
+    trump_rank: Optional[str] = None   # 定主的那张牌的 rank（2/K/A/...）；办二=2，翻底=翻到的2/缺门主时=None
     declared_by: Optional[int] = None  # 办二/翻底者座位
     declare_method: DeclareMethod = "none"
 

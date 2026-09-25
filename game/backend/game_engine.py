@@ -117,6 +117,7 @@ def _begin_round(state: GameState, *, is_first_round: bool) -> None:
     state.bottom_visible_to = []
     state.reveal_flip_index = 0
     state.trump_suit = None
+    state.trump_rank = None
     state.declared_by = None
     state.declare_method = "none"
     state.tribute_cards = []
@@ -230,6 +231,7 @@ def do_declare_ban2(state: GameState, seat: int, card_id: str) -> None:
         raise ValueError("你手里没有这张 2")
     # 设置主牌
     state.trump_suit = card.suit
+    state.trump_rank = "2"
     state.declared_by = seat
     state.declare_method = "ban2"
     state.log(
@@ -279,6 +281,7 @@ def do_flip_bottom(state: GameState, flipper_seat: int) -> None:
     # 第一张 2 立刻定主
     if state.trump_suit is None and card.rank == "2" and not card.is_joker:
         state.trump_suit = card.suit
+        state.trump_rank = "2"
         state.declared_by = flipper_seat
         state.declare_method = "flip"
         state.log(f"翻到 2！主牌花色：{cu.SUIT_NAMES_CN[card.suit]} {cu.SUIT_SYMBOLS[card.suit]}",
@@ -297,6 +300,7 @@ def do_flip_bottom(state: GameState, flipper_seat: int) -> None:
                 return
             else:
                 state.trump_suit = suit
+                state.trump_rank = None
                 state.declared_by = flipper_seat
                 state.declare_method = "flip"
                 if status == "missing_suit":
@@ -755,14 +759,12 @@ def _resolve_trick(state: GameState) -> None:
     # 是否最后一手？
     if all(p.hand_count == 0 for p in state.players.values()):
         state.last_trick_is_trump_win = is_trump_win
-        # 抠底判定：副家队赢 + 全主赢
+        # 底牌分：副家队赢最后一手且全主赢 → 直接计入副家得分（不翻倍）
         if state.defender_team is not None and seat_team(winner_seat) == state.defender_team and is_trump_win:
             state.bottom_captured = True
             state.defender_total_score += state.bottom_score
-            state.log(f"🎉 副家最后一手以主赢，抠底成功！底牌 +{state.bottom_score} 分",
+            state.log(f"副家最后一手以主赢，取得底牌 +{state.bottom_score} 分",
                       level="success")
-        else:
-            state.log(f"底牌分数作废（抠底失败）", level="warn")
         # 进入翻底牌展示
         state.phase = "reveal_bottom"
         state.reveal_flip_index = 0
@@ -825,7 +827,7 @@ def _settle_round(state: GameState) -> None:
         log.warning(f"try_persist_round hook failed: {e}")
     state.log(
         f"📊 第 {state.round_number} 局结算：副家得 {score} 分 / 底牌{state.bottom_score}分"
-        f"({'抠底+' if state.bottom_captured else '未得'}) → 下局上供 {tribute_count} 张，"
+        f"{'底牌分+' if state.bottom_captured else ''} → 下局上供 {tribute_count} 张，"
         f"{'换庄' if change_banker else '庄家不变'}（新庄家：座位{new_banker+1}）",
         level="success"
     )

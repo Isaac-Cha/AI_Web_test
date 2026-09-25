@@ -74,7 +74,7 @@ export default function GameLobby() {
             </h1>
           </div>
           <p className="text-white/70 text-sm mt-1">
-            54 张扑克 4 人上供娱乐游戏 · 支持 AI 陪练 · 与主站进程/构建/部署三隔离
+            54 张扑克 4 人上供娱乐游戏 · 支持 AI 陪练
           </p>
         </div>
         <div className={"chip px-3 py-1.5 text-sm " + (health?.ok ? "bg-emerald-600/30 text-emerald-100" : "bg-rose-600/30 text-rose-100")}>
@@ -127,16 +127,14 @@ export default function GameLobby() {
         <div className="flex items-start gap-3">
           <Info className="w-5 h-5 text-poker-gold flex-shrink-0 mt-0.5"/>
           <ul className="list-disc list-inside space-y-1">
-            <li>规则：摸牌 → 办二（摸到 2 可选择办二，同花色 2 成为主花色）→ 翻底定主 → 扣底 6 张 → 上供（副家得分≥35 则供 0-3 张最大主非分）→ 庄家分配 → 庄家与对家等量还牌（对家花色互不相同）→ 13 轮出牌（可甩牌/杀/抠底）→ 翻底 → 结算查上供表 → 下一局</li>
-            <li>输赢：庄家队 vs 副家队（对家搭档同队）；副家得分 &lt; 35 庄家胜；副家最后一手全主赢即抠底成功（底牌分 ×2）</li>
-            <li>隐私：服务器端为每人视角单独裁剪 state；其他人手牌、扣底前底牌、上供中间牌不会泄露给违规者。</li>
+            <li>规则：摸牌 → 办二（摸到 2 可选择办二，同花色 2 成为主花色）→ 翻底定主 → 扣底 6 张 → 上供（副家得分≥35 则供 0-3 张最大主非分）→ 庄家分配 → 庄家与对家等量还牌（对家花色互不相同）→ 13 轮出牌（可甩牌/杀）→ 翻底 → 结算查上供表 → 下一局</li>
+            <li>输赢：庄家队 vs 副家队（对家搭档同队）；副家得分 &lt; 35 庄家胜；副家最后一手全主赢即取得底牌分</li>
           </ul>
         </div>
       </section>
 
       <footer className="text-center text-white/40 text-xs pb-4">
         <Link to="/" className="hover:text-poker-gold">← 返回主站</Link>
-        {" "}· 独立前端 · 工程位于 <code>game/frontend/</code>
       </footer>
     </div>
   );

@@ -27,11 +27,10 @@ export default function ResultModal({ state, onNext, onClose }) {
             胜方：<span className="text-poker-gold2">队 {winner}</span> · 负方：队 {loser}
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-5">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
           <Stat label="副家得分" value={`${r.defender_score} / 100`} tone="rose" />
           <Stat label="底牌分" value={r.bottom_score} tone="amber" />
-          <Stat label="抠底" value={r.bottom_captured ? "是（×2）" : "否"} tone="purple" />
-          <Stat label="总分（含抠底）" value={r.defender_score + (r.bottom_captured ? 2 * r.bottom_score : r.bottom_score)} tone="emerald" />
+          <Stat label="总分" value={r.defender_score + r.bottom_score} tone="emerald" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mb-5">
           <Stat label="下轮上供张数" value={`${r.tribute_count} 张`} tone="sky" />
@@ -43,7 +42,7 @@ export default function ResultModal({ state, onNext, onClose }) {
           查上供表（规则 5.1）：
           <ul className="list-disc list-inside ml-1 mt-1 space-y-0.5">
             <li>副家 0 → 供 3 张；≤10 → 供 2；&lt;25 → 供 1 不换庄；&lt;35 → 供 0 不换庄；&lt;40 → 供 0 换庄；&lt;50 → 供 1 换庄；&lt;60 → 供 2 换庄；≥60 → 供 3 换庄</li>
-            <li>副家最后一手全主且赢 → 抠底成功（底牌分 × 2 计入副家）</li>
+            <li>副家最后一手全主且赢 → 取得底牌分</li>
           </ul>
         </div>
         <div className="flex justify-end gap-2">

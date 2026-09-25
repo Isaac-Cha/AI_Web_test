@@ -2,9 +2,9 @@ import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGameSocket } from "@/hooks/useGameSocket";
 import { toast } from "sonner";
-import { getPlayerMap, savePlayerMap } from "@/utils/cardUtils";
+import { getPlayerMap, savePlayerMap, isScore, cardScore } from "@/utils/cardUtils";
 import { http } from "@/lib/api";
-import { Link, Home, Users } from "lucide-react";
+import { Home } from "lucide-react";
 
 import StatusBar from "@/components/StatusBar";
 import DeckArea from "@/components/DeckArea";
@@ -14,15 +14,12 @@ import HandCards from "@/components/HandCards";
 import OpponentHandStack from "@/components/OpponentHandStack";
 import ActionButtons from "@/components/ActionButtons";
 import ResultModal from "@/components/ResultModal";
+import PlayingCard from "@/components/PlayingCard";
 
-/**
- * 4 人 2×2 游戏房间容器（布局与设计文档 7.1 对齐）
- * 屏幕四角落：
- *   左上 P1（seat0）/ 右上 P2（seat1）
- *   左下 P4（seat3）/ 右下 P3（seat2）
- *  底部放「自己的手牌+操作按钮」，其余三个对手放 OpponentHandStack
- * viewerSeat 决定「我是谁」
- */
+// 物理 seat(0-3) -> 显示位置 dp(0=BOTTOM我 / 1=RIGHT上家 / 2=TOP对家 / 3=LEFT下家)
+// 公式：dp(seat, viewer) = (seat - viewer + 4) % 4
+const seatToDp = (seat, viewer) => (seat - viewer + 4) % 4;
+
 export default function GameRoom() {
   const { roomId } = useParams();
   const nav = useNavigate();
@@ -34,7 +31,6 @@ export default function GameRoom() {
   const [lastWinnerSeat, setLastWinnerSeat] = useState(null);
   const [showResult, setShowResult] = useState(false);
 
-  // 1) 从本地缓存拿 playerId；如果没有，就用 HTTP /room/join 静默加入（匿名玩家 AI 名）
   useEffect(() => {
     let alive = true;
     const cached = getPlayerMap(roomId);
@@ -61,12 +57,10 @@ export default function GameRoom() {
   }, [roomId]);
 
   const onState = useCallback((nextState, vs) => {
-    // 检测到 settlement 就弹出结果面板
     if (nextState && nextState.phase === "settlement" &&
         (!state || state.phase !== "settlement")) {
       setShowResult(true);
     }
-    // 记录 lastWinner：如果 tricks_history 比之前长，赢家就是最后一个 trick 的 winner_seat
     if (state && nextState && nextState.tricks_history?.length > state.tricks_history?.length) {
       const last = nextState.tricks_history[nextState.tricks_history.length - 1];
       if (last?.winner_seat != null) setLastWinnerSeat(last.winner_seat);
@@ -75,21 +69,50 @@ export default function GameRoom() {
     if (vs != null && viewerSeat == null) setViewerSeat(vs);
   }, [state, viewerSeat]);
 
-  const { actions, readyState } = useGameSocket({
+  const clearSelected = useCallback(() => setSelectedIds([]), []);
+
+  const { actions: rawActions, readyState } = useGameSocket({
     roomId, playerId, onState,
     onError: () => {},
     onOpen: () => {},
   });
 
-  // 自己（viewerSeat）的手牌
+  // 动作包装层：按钮点击后立即清空选中（乐观），保留原动作调用
+  const actions = useMemo(() => {
+    const wrap = (fn, shouldClear = true) => (...args) => {
+      const ret = fn(...args);
+      if (shouldClear) clearSelected();
+      return ret;
+    };
+    return {
+      ...rawActions,
+      playCards: wrap(rawActions.playCards),
+      discardBottom: wrap(rawActions.discardBottom),
+      declareBan2: wrap(rawActions.declareBan2),
+      selectTribute: wrap(rawActions.selectTribute),
+      selectReturn: wrap(rawActions.selectReturn),
+      distributeTribute: (payload) => {
+        const ret = rawActions.distributeTribute(payload);
+        clearSelected();
+        return ret;
+      },
+      declineCards: wrap(rawActions.declineCards, false),
+      nextRound: wrap(rawActions.nextRound, false),
+      drawCard: wrap(rawActions.drawCard, false),
+      flipBottom: wrap(rawActions.flipBottom, false),
+      revealNext: wrap(rawActions.revealNext, false),
+      start: wrap(rawActions.start, false),
+    };
+  }, [rawActions, clearSelected]);
+
   const me = state?.players?.find(p => p.seat === viewerSeat);
   const myHand = me?.hand || [];
 
-  // 切换扣底阶段 / 选牌等阶段时清空选择
+  // 阶段/轮次变化仍清空（双保险）
   useEffect(() => {
-    setSelectedIds([]);
+    clearSelected();
     setLastDistributePick(null);
-  }, [state?.phase, state?.round_number]);
+  }, [state?.phase, state?.round_number, clearSelected]);
 
   const toggleCard = useCallback((id, ctx = "hand") => {
     if (ctx === "distribute-pick") {
@@ -102,62 +125,116 @@ export default function GameRoom() {
     });
   }, [lastDistributePick]);
 
-  // 布局：把「我」放到屏幕底部；三个对手分别在顶部左右 + 侧
-  // 布局模式根据我的座位自动旋转（视觉：我永远在屏幕正下方），但实际座位角标 P1-P4 仍按物理 seat
   const seatMeta = useMemo(() => {
     return [0, 1, 2, 3].map(s => {
       const p = state?.players?.find(x => x.seat === s);
       const isMe = s === viewerSeat;
-      return { seat: s, player: p, isMe, name: p?.name || `P${s+1}空座`,
-        team: p?.team || "-", ai: !!p?.is_ai, dc: !!p?.disconnected,
-        banker: s === state?.banker_seat, partner: s === state?.banker_partner_seat,
+      return {
+        seat: s,
+        dp: viewerSeat == null ? null : seatToDp(s, viewerSeat),
+        player: p,
+        isMe,
+        name: p?.name || `P${s+1}空座`,
+        team: p?.team || "-",
+        ai: !!p?.is_ai,
+        dc: !!p?.disconnected,
+        banker: s === state?.banker_seat,
+        partner: s === state?.banker_partner_seat,
         count: p?.hand_count || (p?.hand ? p.hand.length : 0),
       };
     });
   }, [state, viewerSeat]);
 
-  // 物理座位 → 屏幕位置：
-  //   s0 左上, s1 右上, s3 左下, s2 右下
-  // 但我们想让我的位置在「底部中间手牌区」，所以三对手放顶部两格 + 侧面
-  const oppSeats = seatMeta.filter(s => !s.isMe);
-  const myMeta = seatMeta.find(s => s.isMe);
+  // 按显示位置 dp 分组
+  const byDp = useMemo(() => {
+    const out = [null, null, null, null];
+    for (const m of seatMeta) if (m.dp != null) out[m.dp] = m;
+    return out;
+  }, [seatMeta]);
 
-  // 我的回合？
-  const myTurn = state?.current_seat === viewerSeat && state?.phase !== "settlement" && !state?.players?.find(p => p.seat === viewerSeat)?.is_ai;
+  const myTurn = state?.current_seat === viewerSeat &&
+    state?.phase !== "settlement" &&
+    !state?.players?.find(p => p.seat === viewerSeat)?.is_ai;
+
+  // 办二展示：庄家座位且声明了 trump_rank="2"（办二）
+  const bankerSeat = state?.banker_seat;
+  const showBanerCard = useMemo(() => {
+    if (bankerSeat == null) return null;
+    if (state?.declare_method !== "ban2") return null;
+    if (!state?.trump_suit) return null;
+    return { rank: state.trump_rank ?? "2", suit: state.trump_suit };
+  }, [bankerSeat, state?.declare_method, state?.trump_rank, state?.trump_suit]);
+
+  // 本方已累计得分牌（本方队赢的所有 trick 中 5/10/K）
+  const myTeamCapturedScoreCards = useMemo(() => {
+    if (!state || viewerSeat == null) return [];
+    const viewerTeam = (viewerSeat === 0 || viewerSeat === 2) ? "A" : "B";
+    const out = [];
+    for (const t of state.tricks_history || []) {
+      const ws = t.winner_seat;
+      if (ws == null) continue;
+      const winnerTeam = (ws === 0 || ws === 2) ? "A" : "B";
+      if (winnerTeam !== viewerTeam) continue;
+      for (const c of Object.values(t.cards_played || {})) {
+        if (!Array.isArray(c)) continue;
+        for (const cc of c) if (isScore(cc)) out.push(cc);
+      }
+    }
+    return out;
+  }, [state, viewerSeat]);
+
+  const wsReadyBadge = readyState === 1 ? "✅" : readyState === 0 ? "连接中" : "❌";
 
   return (
-    <div className="min-h-screen w-full p-2 md:p-4 flex flex-col gap-2 md:gap-3 max-w-[1500px] mx-auto">
-      {/* 顶部：状态栏 + 返回大厅 */}
+    <div className="p-2 md:p-4 landscape:max-[900px]:p-1 flex flex-col gap-2 md:gap-3 max-w-[1500px] mx-auto text-white">
       <div className="flex items-stretch gap-2">
-        <Link to="/" className="btn btn-ghost !py-2 whitespace-nowrap">
+        <button
+          className="btn btn-ghost !py-2 whitespace-nowrap"
+          onClick={() => nav("/")}
+        >
           <Home className="w-4 h-4"/> 大厅
-        </Link>
+        </button>
         <div className="flex-1">
           <StatusBar state={state} viewerSeat={viewerSeat} myTurn={myTurn}/>
         </div>
         <div className="chip bg-white/10 text-white whitespace-nowrap">
-          房间 {roomId} · WebSocket {readyState === 1 ? "✅" : (readyState === 0 ? "连接中" : "❌")}
+          房间 {roomId} · WebSocket {wsReadyBadge}
         </div>
       </div>
 
-      {/* 3×3 主体区域：
-          [TopLeft P?]   [中间状态/PlayArea]   [TopRight P?]
-          [SideLeft P?]  [PlayArea 居中]       [SideRight P?]
-          [ 底部：自己手牌+操作按钮（全屏宽） ]
-      */}
-      <div className="flex-1 grid grid-cols-12 gap-2 md:gap-3 min-h-[640px]">
-        {/* 左上对手（opp0） */}
-        <div className="col-span-12 md:col-span-3">
-          <OpponentPanel meta={oppSeats[0]} trump={state?.trump_suit}/>
+      {/* TOP（对家 dp=2） */}
+      <div className="grid grid-cols-12 gap-2 md:gap-3">
+        <div className="col-span-12 md:col-start-4 md:col-span-6 flex justify-center">
+          <OpponentPanel meta={byDp[2]} trump={state?.trump_suit}
+                         isBanker={bankerSeat != null && byDp[2]?.seat === bankerSeat}
+                         banerCard={bankerSeat != null && byDp[2]?.seat === bankerSeat ? showBanerCard : null}
+                         side="top" partner />
         </div>
-        {/* 中间主区：3 行 状态栏/PlayArea/DeckOrTribute */}
+      </div>
+
+      {/* LEFT（下家 dp=3） + CENTER PlayArea/Deck/Tribute + RIGHT（上家 dp=1） */}
+      <div className="grid grid-cols-12 gap-2 md:gap-3 min-h-[260px] md:min-h-[320px]">
+        <div className="col-span-6 md:col-span-3 md:block hidden">
+          <OpponentPanel meta={byDp[3]} trump={state?.trump_suit} side="left"
+                         isBanker={bankerSeat != null && byDp[3]?.seat === bankerSeat}
+                         banerCard={bankerSeat != null && byDp[3]?.seat === bankerSeat ? showBanerCard : null} />
+        </div>
         <div className="col-span-12 md:col-span-6 flex flex-col gap-2 md:gap-3">
-          <div className="grid grid-cols-2 gap-2 md:gap-3 md:hidden">
-            <OpponentPanel meta={oppSeats[1]} trump={state?.trump_suit}/>
-            <OpponentPanel meta={oppSeats[2]} trump={state?.trump_suit}/>
+          {/* 移动端：上/下家一行两个 */}
+          <div className="grid grid-cols-2 gap-2 md:hidden">
+            <OpponentPanel meta={byDp[3]} trump={state?.trump_suit} side="left" compact
+                           isBanker={bankerSeat != null && byDp[3]?.seat === bankerSeat}
+                           banerCard={bankerSeat != null && byDp[3]?.seat === bankerSeat ? showBanerCard : null} />
+            <OpponentPanel meta={byDp[1]} trump={state?.trump_suit} side="right" compact
+                           isBanker={bankerSeat != null && byDp[1]?.seat === bankerSeat}
+                           banerCard={bankerSeat != null && byDp[1]?.seat === bankerSeat ? showBanerCard : null} />
           </div>
-          <PlayArea state={state} viewerSeat={viewerSeat} lastWinnerSeat={lastWinnerSeat} />
-          {state?.phase === "tribute_select" || state?.phase === "tribute_distribute" || state?.phase === "tribute_return" ? (
+
+          <PlayArea state={state} viewerSeat={viewerSeat} />
+
+          {state?.phase === "tribute_select" ||
+           state?.phase === "tribute_distribute" ||
+           state?.phase === "tribute_return" ? (
             <TributeArea
               state={state}
               viewerSeat={viewerSeat}
@@ -166,19 +243,43 @@ export default function GameRoom() {
               onToggle={toggleCard}
             />
           ) : (
-            <DeckArea state={state}/>
+            <DeckArea
+              state={state}
+              viewerSeat={viewerSeat}
+              capturedScoreCards={myTeamCapturedScoreCards}
+            />
           )}
         </div>
-        {/* 右上对手（opp1） */}
-        <div className="col-span-6 md:col-span-3">
-          <OpponentPanel meta={oppSeats[1]} trump={state?.trump_suit}/>
+        <div className="col-span-6 md:col-span-3 md:block hidden">
+          <OpponentPanel meta={byDp[1]} trump={state?.trump_suit} side="right"
+                         isBanker={bankerSeat != null && byDp[1]?.seat === bankerSeat}
+                         banerCard={bankerSeat != null && byDp[1]?.seat === bankerSeat ? showBanerCard : null} />
         </div>
-        {/* 左下对手（opp2，仅 md 可见；移动端已显示上面） */}
-        <div className="hidden md:block md:col-span-3">
-          <OpponentPanel meta={oppSeats[2]} trump={state?.trump_suit}/>
-        </div>
-        {/* 自己的手牌区（宽 9） */}
-        <div className="col-span-12 md:col-span-9 flex flex-col gap-2 md:gap-3">
+      </div>
+
+      {/* BOTTOM（我 dp=0） */}
+      <div className="grid grid-cols-12 gap-2 md:gap-3">
+        <div className="col-span-12 flex flex-col gap-2 md:gap-3">
+          {byDp[0] && byDp[0].seat === bankerSeat && (
+            <div className="panel p-2 md:p-3 flex items-center justify-between gap-2 flex-wrap">
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="chip bg-poker-gold text-black">P{bankerSeat + 1}（我）· 庄</span>
+                {showBanerCard && (
+                  <div className="flex items-center gap-2">
+                    <span className="chip bg-emerald-500/25 text-emerald-100 whitespace-nowrap">办二</span>
+                    <PlayingCard
+                      card={{ id: "baner-display", rank: showBanerCard.rank, suit: showBanerCard.suit, is_joker: false }}
+                      trumpSuit={state?.trump_suit}
+                      size="sm"
+                      faceDown={false}
+                      title="办二声明牌"
+                    />
+                  </div>
+                )}
+              </div>
+              <div className="w-32 md:w-48 h-1" />
+            </div>
+          )}
           <ActionButtons
             state={state}
             viewerSeat={viewerSeat}
@@ -214,7 +315,7 @@ export default function GameRoom() {
   );
 }
 
-function OpponentPanel({ meta, trump }) {
+function OpponentPanel({ meta, trump, side = "top", compact = false, isBanker = false, banerCard = null, partner = false }) {
   if (!meta) return null;
   const label =
     "P" + (meta.seat + 1) +
@@ -226,11 +327,35 @@ function OpponentPanel({ meta, trump }) {
     (meta.count != null ? `手牌 ${meta.count}` : "") +
     (meta.dc ? " · 离线" : meta.ai ? "" : " · 在线");
   return (
-    <OpponentHandStack
-      count={meta.count}
-      trumpSuit={trump}
-      label={label}
-      subLabel={`${meta.name}${meta.ai ? " 🤖" : ""}`}
-    />
+    <div className="panel p-2 md:p-3 w-full">
+      <div className={"flex gap-2 md:gap-3 " + (banerCard ? "justify-between items-stretch" : "justify-between items-center flex-wrap")}>
+        <div className="flex-1 min-w-0">
+          <OpponentHandStack
+            count={meta.count}
+            trumpSuit={trump}
+            label={label}
+            subLabel={`${meta.name}${meta.ai ? " 🤖" : ""}`}
+            horizontal={side !== "top" || partner}
+            compact={compact}
+            partner={partner}
+          />
+        </div>
+        {banerCard && (
+          <div className="flex flex-col gap-1 shrink-0 items-center justify-start pt-1 md:pt-0 md:justify-center min-w-[4rem]">
+            <span className="chip bg-emerald-500/25 text-emerald-100 whitespace-nowrap w-max">办二</span>
+            <PlayingCard
+              card={{ id: "baner-op-" + meta.seat, rank: banerCard.rank, suit: banerCard.suit, is_joker: false }}
+              trumpSuit={trump}
+              size="sm"
+              faceDown={false}
+              title="办二声明牌"
+            />
+          </div>
+        )}
+        {isBanker && !banerCard && (
+          <span className="chip bg-poker-gold/90 text-black whitespace-nowrap shrink-0">庄家</span>
+        )}
+      </div>
+    </div>
   );
 }
