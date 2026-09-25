@@ -1,8 +1,10 @@
 import React from "react";
 import { X, Trophy, Medal, RefreshCw } from "lucide-react";
+import DECK_RULES from "@/config/deck_rules";
 
 /**
  * 结算弹窗：RoundResult + 按钮下一局
+ * 所有规则文字集中在 @/config/deck_rules.js，用户可直接改
  */
 export default function ResultModal({ state, onNext, onClose }) {
   if (!state || state.phase !== "settlement") return null;
@@ -10,13 +12,27 @@ export default function ResultModal({ state, onNext, onClose }) {
   if (!r) return null;
   const winner = r.winner_team || (r.defender_score < 35 && !r.change_banker ? ((state.banker_seat === 0 || state.banker_seat === 2) ? "A" : "B") : r.defender_team);
   const loser = winner === "A" ? "B" : "A";
+
+  const defenderSeats = state.defender_team_seats || [];
+  const lastWinnerIsDefender = r.winner_team === r.defender_team;
+  const capture = !!r.bottom_captured;
+
+  // 抠底结果（来自 @/config/deck_rules.captureBottom）
+  let captureNote;
+  if (r.defender_score < 35 && !lastWinnerIsDefender) {
+    captureNote = DECK_RULES.captureBottom.failNote_bankerWin;
+  } else if (lastWinnerIsDefender && !capture) {
+    captureNote = DECK_RULES.captureBottom.failNote_notTrumpWin;
+  } else if (lastWinnerIsDefender && capture) {
+    captureNote = DECK_RULES.captureBottom.successNote + " " + DECK_RULES.captureBottom.noDoubleNote;
+  } else {
+    captureNote = null;
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="panel w-full max-w-2xl p-5 md:p-7 relative">
-        <button
-          className="absolute right-3 top-3 btn btn-ghost !px-2 !py-1"
-          onClick={onClose}
-        >
+        <button className="absolute right-3 top-3 btn btn-ghost !px-2 !py-1" onClick={onClose}>
           <X className="w-4 h-4" />
         </button>
         <div className="text-center mb-4">
@@ -26,7 +42,11 @@ export default function ResultModal({ state, onNext, onClose }) {
           <div className="text-2xl font-black">
             胜方：<span className="text-poker-gold2">队 {winner}</span> · 负方：队 {loser}
           </div>
+          {captureNote && (
+            <div className="text-sm text-white/80 mt-1">{captureNote}</div>
+          )}
         </div>
+
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3 mb-5">
           <Stat label="副家得分" value={`${r.defender_score} / 100`} tone="rose" />
           <Stat label="底牌分" value={r.bottom_score} tone="amber" />
@@ -38,17 +58,24 @@ export default function ResultModal({ state, onNext, onClose }) {
           <Stat label="下一局庄家" value={`P${r.new_banker_seat + 1}`} tone="lime" />
           <Stat label="上供者" value={`P${r.tribute_giver_seat + 1}`} tone="pink" />
         </div>
+
         <div className="text-xs text-white/70 mb-5 panel p-3">
-          查上供表（规则 5.1）：
-          <ul className="list-disc list-inside ml-1 mt-1 space-y-0.5">
-            <li>副家 0 → 供 3 张；≤10 → 供 2；&lt;25 → 供 1 不换庄；&lt;35 → 供 0 不换庄；&lt;40 → 供 0 换庄；&lt;50 → 供 1 换庄；&lt;60 → 供 2 换庄；≥60 → 供 3 换庄</li>
-            <li>副家最后一手全主且赢 → 取得底牌分</li>
+          <div className="font-bold text-white/80 mb-1">
+            {DECK_RULES.captureBottom.conditionZh}
+          </div>
+          <div className="font-bold text-white/80 mt-2 mb-1">
+            {DECK_RULES.tributeTable.header}
+          </div>
+          <ul className="list-disc list-inside ml-1 space-y-0.5">
+            {DECK_RULES.tributeTable.rows.map((row, i) => (
+              <li key={i}>{row}</li>
+            ))}
           </ul>
+          <div className="mt-2 text-white/60">{DECK_RULES.tributeTable.finalNote}</div>
         </div>
+
         <div className="flex justify-end gap-2">
-          <button className="btn btn-ghost" onClick={onClose}>
-            收起
-          </button>
+          <button className="btn btn-ghost" onClick={onClose}>收起</button>
           <button className="btn btn-primary" onClick={onNext}>
             <RefreshCw className="w-4 h-4" /> 准备下一局
           </button>

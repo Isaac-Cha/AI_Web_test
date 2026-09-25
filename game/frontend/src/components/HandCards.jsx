@@ -26,19 +26,23 @@ export default function HandCards({
   const totalPx = n > 0 ? (n - 1) * overlapStep + widthPx : 0;
 
   return (
-    <div className={cn("panel p-3 md:p-4", compact ? "" : "min-h-[160px]")}>
-      <div className="flex items-center justify-between mb-2 text-xs text-white/80">
-        <span className="flex items-center gap-2">
-          <span className="chip bg-white/10 text-white">手牌 {n}</span>
-          <span className="chip bg-poker-gold/20 text-poker-gold">主 {countTrumps}</span>
-          <span className="chip bg-red-500/20 text-red-200">分 {total}</span>
-          {selectedLimitHint && <span className="chip bg-sky-500/20 text-sky-200">{selectedLimitHint}</span>}
-        </span>
+    <div className={cn("relative", compact ? "" : "min-h-[140px]")}>
+      {/* 手牌信息小 chip（右上角浮动，不再使用整块半透明 panel）*/}
+      <div className="absolute top-0 right-0 z-20 flex flex-wrap justify-end gap-1 max-w-[65%] pointer-events-none">
+        <span className="chip bg-black/55 backdrop-blur text-white text-[10px] md:text-xs !px-2 !py-0.5">手牌 {n}</span>
+        <span className="chip bg-poker-gold/30 backdrop-blur text-poker-gold text-[10px] md:text-xs !px-2 !py-0.5">主 {countTrumps}</span>
+        <span className="chip bg-red-500/30 backdrop-blur text-red-200 text-[10px] md:text-xs !px-2 !py-0.5">分 {total}</span>
         {selectedIds.length > 0 && (
-          <span className="chip bg-emerald-500/20 text-emerald-200">已选 {selectedIds.length}</span>
+          <span className="chip bg-emerald-500/30 backdrop-blur text-emerald-200 text-[10px] md:text-xs !px-2 !py-0.5">已选 {selectedIds.length}</span>
+        )}
+        {selectedLimitHint && (
+          <span className="chip bg-sky-500/30 backdrop-blur text-sky-200 text-[10px] md:text-xs !px-2 !py-0.5 whitespace-nowrap">
+            {selectedLimitHint}
+          </span>
         )}
       </div>
-      <div className="flex justify-center">
+
+      <div className="flex justify-center pt-8 md:pt-9">
         <div
           className="relative hand-wrap"
           style={{ width: totalPx || 1, height: size === "sm" ? 80 : 120 }}
@@ -68,7 +72,7 @@ export default function HandCards({
             );
           })}
           {!n && (
-            <div className="absolute inset-0 flex items-center justify-center text-white/50 text-sm">空</div>
+            <div className="absolute inset-0 flex items-center justify-center text-white/50 text-sm">手牌空</div>
           )}
         </div>
       </div>

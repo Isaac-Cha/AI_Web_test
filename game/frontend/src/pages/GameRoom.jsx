@@ -111,6 +111,11 @@ export default function GameRoom() {
 
   const myTeamCapturedScoreCards = useMemo(() => {
     if (!state || viewerSeat == null) return [];
+    const bs = state.banker_seat;
+    const bps = state.banker_partner_seat;
+    // 庄家（banker_seat 或 banker_partner_seat）= 庄家队。庄家不计分也不显示得分，直接返回空
+    const iAmBankerTeam = (viewerSeat === bs || viewerSeat === bps);
+    if (iAmBankerTeam) return [];
     const viewerTeam = (viewerSeat === 0 || viewerSeat === 2) ? "A" : "B";
     const out = [];
     for (const t of state.tricks_history || []) {
