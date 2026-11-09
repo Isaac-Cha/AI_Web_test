@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Lock } from "lucide-react";
 import { toast } from "sonner";
@@ -7,6 +7,14 @@ import api from "./api";
 export default function Login() {
   const [token, setToken] = useState("");
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const notice = sessionStorage.getItem("admin_auth_notice");
+    if (notice) {
+      sessionStorage.removeItem("admin_auth_notice");
+      toast.error(notice);
+    }
+  }, []);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -23,7 +31,12 @@ export default function Login() {
         navigate("/admin");
       }
     } catch (err) {
-      toast.error("登录失败：Token 无效");
+      const status = err.response?.status;
+      toast.error(
+        status === 401
+          ? "登录失败：ADMIN_TOKEN 无效或已被更换"
+          : `登录失败${status ? `（HTTP ${status}）` : "：无法连接后台"}`
+      );
     }
   };
 
