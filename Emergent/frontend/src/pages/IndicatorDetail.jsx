@@ -6,6 +6,7 @@ import { CheckCircle2, Sparkles, BookOpen } from "lucide-react";
 import { useLang } from "@/context/LanguageContext";
 import VersionSwitcher, { useVariant, useHref } from "@/components/VersionSwitcher";
 import WechatQrModal from "@/components/WechatQrModal";
+import ImageLightbox from "@/components/ImageLightbox";
 import { API } from "@/lib/api";
 
 const sf = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif";
@@ -62,6 +63,7 @@ export default function IndicatorDetail() {
   const [ind, setInd] = useState(null);
   const [loading, setLoading] = useState(true);
   const [qrOpen, setQrOpen] = useState(false);
+  const [lightboxIndex, setLightboxIndex] = useState(-1);
 
   useEffect(() => {
     setLoading(true);
@@ -94,6 +96,7 @@ export default function IndicatorDetail() {
   const ctaCls = isApple
     ? "inline-flex items-center gap-2 px-6 py-3 rounded-full bg-[#0071E3] hover:bg-[#0A84FF] text-white font-semibold shadow-[0_10px_28px_-10px_rgba(0,113,227,0.6)]"
     : "inline-flex items-center gap-2 px-6 py-3 rounded-full border border-cyan2/60 text-cyan2 hover:bg-cyan2/10 font-semibold";
+  const screenshots = Array.isArray(ind.screenshots) ? ind.screenshots.filter(Boolean) : [];
 
   return (
     <div className={pageBg} style={pageStyle} data-testid="indicator-detail-page">
@@ -235,7 +238,7 @@ export default function IndicatorDetail() {
         </motion.div>
       </section>
 
-      {Array.isArray(ind.screenshots) && ind.screenshots.length > 0 && (
+      {screenshots.length > 0 && (
         <section className="max-w-7xl mx-auto px-6 md:px-10 pb-24">
           <motion.div
             initial={{ opacity: 0, y: 18 }}
@@ -249,22 +252,37 @@ export default function IndicatorDetail() {
               SCREENSHOTS
             </div>
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              {ind.screenshots.map((u, idx) => (
-                <a
+              {screenshots.map((u, idx) => (
+                <button
+                  type="button"
                   key={`${u}-${idx}`}
-                  href={u}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`block overflow-hidden rounded-xl border ${isApple ? "border-black/10 bg-white" : "border-white/10 bg-white/5"}`}
+                  onClick={() => setLightboxIndex(idx)}
+                  className={`group block w-full overflow-hidden rounded-xl border text-left ${isApple ? "border-black/10 bg-white" : "border-white/10 bg-white/5"}`}
+                  aria-label={`放大查看第 ${idx + 1} 张指标截图`}
                 >
-                  <img src={u} alt={`${ind.name_en} screenshot ${idx + 1}`} className="w-full h-48 object-cover" loading="lazy" />
-                </a>
+                  <img
+                    src={u}
+                    alt={`${ind.name_en} screenshot ${idx + 1}`}
+                    className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-[1.03]"
+                    loading="lazy"
+                  />
+                  <span className={`block px-3 py-2 text-xs ${isApple ? "text-black/55" : "text-white/55"}`}>
+                    {lang === "zh" ? "点击在本站放大查看" : "Click to enlarge on this page"}
+                  </span>
+                </button>
               ))}
             </div>
           </motion.div>
         </section>
       )}
 
+      <ImageLightbox
+        images={screenshots}
+        activeIndex={lightboxIndex}
+        onChange={setLightboxIndex}
+        onClose={() => setLightboxIndex(-1)}
+        altPrefix={lang === "zh" ? `${ind.name_zh} 指标截图` : `${ind.name_en} indicator screenshot`}
+      />
       <WechatQrModal open={qrOpen} onOpenChange={setQrOpen} />
     </div>
   );
