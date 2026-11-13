@@ -22,7 +22,7 @@ def upsert_many(col, rows, key_field: str):
     doc = dict(r)
     doc.setdefault('created_at', now_iso())
     doc['updated_at'] = now_iso()
-    col.update_one({key_field: k}, {'$set': doc, '$setOnInsert': {'created_at': doc['created_at']}}, upsert=True)
+    col.update_one({key_field: k}, {'$set': doc}, upsert=True)
     n += 1
   return n
 
@@ -39,6 +39,7 @@ def main() -> None:
   eas = load_json(seed_dir / 'seed_eas.json')
   indicators = load_json(seed_dir / 'seed_indicators.json')
   tutorials = load_json(seed_dir / 'seed_tutorials.json')
+  articles = load_json(seed_dir / 'seed_articles.json')
 
   client = MongoClient(db_uri)
   db = client[db_name]
@@ -46,8 +47,9 @@ def main() -> None:
   n_ea = upsert_many(db.eas, eas, 'id')
   n_ind = upsert_many(db.indicators, indicators, 'id')
   n_tut = upsert_many(db.tutorials, tutorials, 'id')
+  n_articles = upsert_many(db.articles, articles, 'slug')
 
-  print({'eas': n_ea, 'indicators': n_ind, 'tutorials': n_tut})
+  print({'eas': n_ea, 'indicators': n_ind, 'tutorials': n_tut, 'articles': n_articles})
 
 
 if __name__ == '__main__':

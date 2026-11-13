@@ -1,0 +1,50 @@
+[
+  {
+    "slug": "closed-vs-floating-drawdown",
+    "title": "已平仓回撤很小，为什么账户仍可能处于高风险？",
+    "summary": "已平仓回撤只描述已经结束的交易，最大浮动回撤反映持仓过程中真实承受过的压力。评估 EA 时，两者不能互相替代。",
+    "content": "# 先分清两个概念\n\n已平仓回撤统计的是已经完成的交易对账户权益造成的下降。最大浮动回撤关注持仓尚未结束时，净值相对余额出现过的最大下降。\n\n## 为什么差异会很大\n\n网格、马丁、对冲解套等策略可能长时间保留亏损仓位。只要这些仓位尚未平仓，余额曲线看起来仍然平稳，但净值、保证金和可用保证金已经承受压力。\n\n## 至少同时查看四项\n\n1. 已平仓最大回撤。\n2. 最大浮动回撤。\n3. 最大保证金占用。\n4. 极端单边行情中的止损、停机和恢复规则。\n\n## 正确的比较方式\n\n比较两个 EA 时，应使用相同的资金规模、杠杆、点差、手续费、滑点、隔夜费和测试区间。没有这些条件，单独的回撤百分比不具备可比性。\n\n历史测试用于理解策略边界，不代表未来收益，也不能替代个人风险适配。",
+    "type": "foundation",
+    "source_refs": [],
+    "related_eas": ["ea-golden-dragon-13"],
+    "related_indicators": [],
+    "research_id": null,
+    "status": "published",
+    "cover": null,
+    "published_at": "2026-11-09T00:00:00+08:00"
+  },
+  {
+    "slug": "tianyan-1-offline-review",
+    "title": "天眼一号：线下测试档案",
+    "summary": "记录来源、文件哈希、平台版本、参数、重绘检查和失效环境。资料补齐后再发布。",
+    "content": "# 待补充\n\n本条目已经建立研究编号，但公开前仍需录入测试时间范围、平台版本、品种周期、参数、文件哈希、实际截图和测试者结论。",
+    "type": "research",
+    "source_refs": [
+      {
+        "title": "EAHub 原始论坛帖",
+        "url": "https://www.eahub.cn/thread-70924-1-1.html",
+        "note": "作者的命中率说法不是本站测试结论。"
+      }
+    ],
+    "related_eas": [],
+    "related_indicators": ["ind-tianyan-1"],
+    "research_id": "RES-2026-001",
+    "status": "draft",
+    "cover": null,
+    "published_at": null
+  },
+  {
+    "slug": "golden-dragon-13-evidence-record",
+    "title": "金龙13号：证据与版本记录",
+    "summary": "按版本保存参数、测试环境、回撤、保证金占用、风险触发过程和脱敏交易记录。",
+    "content": "# 待补充\n\n公开前需关联真实产品截图、参数截图、脱敏交易记录、净值与浮动盈亏曲线、典型持仓过程和风险触发记录。",
+    "type": "research",
+    "source_refs": [],
+    "related_eas": ["ea-golden-dragon-13"],
+    "related_indicators": [],
+    "research_id": "RES-2026-002",
+    "status": "draft",
+    "cover": null,
+    "published_at": null
+  }
+]
