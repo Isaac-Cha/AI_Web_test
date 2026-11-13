@@ -96,6 +96,16 @@ Payload 字段（示例）：
 - `POST /api/submissions`
 - `GET /api/submissions`
 
+`POST` 接收纯文本：姓名必填且最多 100 字符，联系方式必填且最多 200 字符，
+邮箱可空（非空时验证格式，最多 254 字符），留言最多 5000 字符。
+拒绝 HTML/编码 HTML、控制字符和未知字段。请求体上限为 32 KiB。
+无效字段返回 422，超大请求返回 413。
+
+`GET` 需要 `X-Admin-Token`；`limit` 为 1–1000（默认 200），
+`kind` 可选 `contact`、`join`、`account_open`。
+读写响应均禁止缓存。历史记录必须作为文本渲染，不得插入 HTML。
+完整说明见 [留言安全升级](../../../docs/submission-security.md)。
+
 ## 在线接口文档
 
 FastAPI 自带：

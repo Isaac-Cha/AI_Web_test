@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "./api";
-import { Trash2, Edit } from "lucide-react";
+import { Trash2, Edit, X } from "lucide-react";
 import { toast } from "sonner";
 import { autoEnglishFromZh, autoId } from "./textAuto";
 
@@ -32,6 +32,21 @@ export default function IndicatorManager() {
     screenshots: "",
     source_url: "",
   });
+  const screenshotUrls = (form.screenshots || "")
+    .split("\n")
+    .map((url) => url.trim())
+    .filter(Boolean);
+
+  const removeScreenshot = (removeIndex) => {
+    setForm((prev) => {
+      const next = (prev.screenshots || "")
+        .split("\n")
+        .map((url) => url.trim())
+        .filter(Boolean)
+        .filter((_, index) => index !== removeIndex);
+      return { ...prev, screenshots: next.join("\n") };
+    });
+  };
   const [importText, setImportText] = useState(
     JSON.stringify(
       {
@@ -524,7 +539,7 @@ export default function IndicatorManager() {
                   />
                 </div>
                 <div className="md:col-span-2">
-                  <div className="text-xs text-neutral-400 mb-1">截图 URLs（每行一个）</div>
+                  <div className="text-xs text-neutral-400 mb-1">指标截图</div>
                   <div className="space-y-2">
                     <div className="flex items-center gap-2">
                       <label className="px-3 py-2 rounded-xl bg-blue-500/15 text-blue-300 border border-blue-500/30 hover:bg-blue-500/20 transition-colors text-sm cursor-pointer whitespace-nowrap">
@@ -564,8 +579,35 @@ export default function IndicatorManager() {
                           }}
                         />
                       </label>
-                      <div className="text-xs text-neutral-500">会自动把链接追加到下方文本框</div>
+                      <div className="text-xs text-neutral-500">上传后点击“保存”；状态为“已发布”时会显示在网站详情页</div>
                     </div>
+                    {screenshotUrls.length > 0 && (
+                      <div className="grid grid-cols-2 gap-3 md:grid-cols-3">
+                        {screenshotUrls.map((url, index) => (
+                          <div key={`${url}-${index}`} className="relative overflow-hidden rounded-xl border border-neutral-700 bg-neutral-950">
+                            <img
+                              src={url}
+                              alt={`指标截图 ${index + 1}`}
+                              className="h-28 w-full object-cover"
+                              loading="lazy"
+                            />
+                            <div className="flex items-center justify-between px-2 py-1.5 text-xs text-neutral-400">
+                              <span>第 {index + 1} 张</span>
+                              <button
+                                type="button"
+                                onClick={() => removeScreenshot(index)}
+                                className="inline-flex h-7 w-7 items-center justify-center rounded-md text-red-400 hover:bg-red-500/10 hover:text-red-300"
+                                title="移除截图"
+                                aria-label={`移除第 ${index + 1} 张截图`}
+                              >
+                                <X size={15} />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                    <div className="text-xs text-neutral-500">截图 URL（每行一个，排列顺序即网站展示顺序）</div>
                     <textarea
                       value={form.screenshots}
                       onChange={(e) => setForm({ ...form, screenshots: e.target.value })}

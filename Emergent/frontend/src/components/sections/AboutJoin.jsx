@@ -102,6 +102,8 @@ export default function AboutJoin() {
               <FormField label={t.about.name}>
                 <Input
                   data-testid="form-name"
+                  maxLength={100}
+                  required
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                   className="bg-white/5 border-white/10 focus-visible:border-cyan2/60"
@@ -110,6 +112,8 @@ export default function AboutJoin() {
               <FormField label={t.about.contact}>
                 <Input
                   data-testid="form-contact"
+                  maxLength={200}
+                  required
                   value={form.contact}
                   onChange={(e) => setForm({ ...form, contact: e.target.value })}
                   className="bg-white/5 border-white/10 focus-visible:border-cyan2/60"
@@ -119,6 +123,7 @@ export default function AboutJoin() {
             <FormField label={t.about.email}>
               <Input
                 data-testid="form-email"
+                maxLength={254}
                 type="email"
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
@@ -128,6 +133,7 @@ export default function AboutJoin() {
             <FormField label={t.about.message}>
               <Textarea
                 data-testid="form-message"
+                maxLength={5000}
                 rows={4}
                 value={form.message}
                 onChange={(e) => setForm({ ...form, message: e.target.value })}

@@ -451,6 +451,8 @@ function HybridAbout() {
             <label className="text-[12px] text-white/60 font-medium">{t.about.name}</label>
             <Input
               data-testid="hybrid-form-name"
+              maxLength={100}
+              required
               value={form.name}
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               className="mt-2 bg-white/5 border-white/10 rounded-xl h-11 text-white"
@@ -460,6 +462,8 @@ function HybridAbout() {
             <label className="text-[12px] text-white/60 font-medium">{t.about.contact}</label>
             <Input
               data-testid="hybrid-form-contact"
+              maxLength={200}
+              required
               value={form.contact}
               onChange={(e) => setForm({ ...form, contact: e.target.value })}
               className="mt-2 bg-white/5 border-white/10 rounded-xl h-11 text-white"
@@ -469,6 +473,7 @@ function HybridAbout() {
             <label className="text-[12px] text-white/60 font-medium">{t.about.email}</label>
             <Input
               data-testid="hybrid-form-email"
+              maxLength={254}
               value={form.email}
               onChange={(e) => setForm({ ...form, email: e.target.value })}
               className="mt-2 bg-white/5 border-white/10 rounded-xl h-11 text-white"
@@ -478,6 +483,7 @@ function HybridAbout() {
             <label className="text-[12px] text-white/60 font-medium">{t.about.message}</label>
             <Textarea
               data-testid="hybrid-form-message"
+              maxLength={5000}
               rows={4}
               value={form.message}
               onChange={(e) => setForm({ ...form, message: e.target.value })}

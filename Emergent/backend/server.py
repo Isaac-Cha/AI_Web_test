@@ -1,4 +1,7 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File
+from fastapi import FastAPI, APIRouter, HTTPException, Header, Depends, UploadFile, File, Query, Request
+from fastapi.exceptions import RequestValidationError
+from fastapi.responses import JSONResponse
+from submission_security import SubmissionCreate, SubmissionBodyLimitMiddleware
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from starlette.concurrency import run_in_threadpool
@@ -49,15 +52,6 @@ class SubmissionBase(BaseModel):
     message: Optional[str] = None
     meta: Optional[dict] = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
-
-
-class SubmissionCreate(BaseModel):
-    kind: Literal["contact", "join", "account_open"]
-    name: str
-    contact: str
-    email: Optional[str] = None
-    message: Optional[str] = None
-    meta: Optional[dict] = None
 
 
 class SubmissionOut(BaseModel):
@@ -384,7 +378,10 @@ async def create_submission(payload: SubmissionCreate):
 
 
 @api_router.get("/submissions", response_model=List[SubmissionOut], dependencies=[Depends(require_admin)])
-async def list_submissions(kind: Optional[str] = None, limit: int = 200):
+async def list_submissions(
+    kind: Optional[Literal["contact", "join", "account_open"]] = None,
+    limit: int = Query(default=200, ge=1, le=1000),
+):
     query = {"kind": kind} if kind else {}
     cursor = db.submissions.find(query, {"_id": 0}).sort("created_at", -1).limit(limit)
     rows = await cursor.to_list(limit)
@@ -802,6 +799,29 @@ async def get_account_equity(account_id: str):
 
 
 app.include_router(api_router)
+
+app.add_middleware(SubmissionBodyLimitMiddleware)
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_error(request: Request, exc: RequestValidationError):
+    if request.url.path.rstrip("/") == "/api/submissions":
+        # Do not reflect personal details or attack strings in error responses.
+        return JSONResponse(status_code=422, content={"detail": [
+            {"loc": list(error["loc"]), "msg": error["msg"], "type": error["type"]}
+            for error in exc.errors()
+        ]})
+    from fastapi.exception_handlers import request_validation_exception_handler
+    return await request_validation_exception_handler(request, exc)
+
+
+@app.middleware("http")
+async def submission_response_headers(request: Request, call_next):
+    response = await call_next(request)
+    if request.url.path.rstrip("/") == "/api/submissions":
+        response.headers["Cache-Control"] = "no-store"
+        response.headers["X-Content-Type-Options"] = "nosniff"
+    return response
 
 app.add_middleware(
     CORSMiddleware,
