@@ -25,6 +25,7 @@ const fadeUp = {
 /* ---------------- Nav ---------------- */
 function AppleNav() {
   const { lang, setLang } = useLang();
+  const href = useHref();
   const items = [
     { id: "home", label: lang === "zh" ? "首页" : "Home" },
     { id: "ea", label: lang === "zh" ? "EA 策略" : "EAs" },
@@ -66,6 +67,9 @@ function AppleNav() {
               {it.label}
             </button>
           ))}
+          <Link to={href("/articles")} className="text-black/80 hover:text-black transition-colors">
+            {lang === "zh" ? "内容库" : "Knowledge"}
+          </Link>
         </nav>
         <div className="flex items-center gap-2">
           <VersionSwitcher />
@@ -119,8 +123,8 @@ function AppleHero() {
         className="mt-6 text-[19px] text-black/70 max-w-xl mx-auto px-6 leading-relaxed"
       >
         {lang === "zh"
-          ? "顶级 EA 策略、MT4 / MT5 指标与 CG 合作平台，专为专业交易者打造。"
-          : "Pro-grade EAs, MT4/MT5 indicators and partner broker support — crafted for serious traders."}
+          ? "用可追溯证据研究 EA、指标与交易系统，帮助交易者理解风险、少走弯路。"
+          : "Evidence-backed EA, indicator and system research to help traders understand risk and avoid preventable mistakes."}
       </motion.p>
       <motion.div
         initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.7, delay: 0.35 }}

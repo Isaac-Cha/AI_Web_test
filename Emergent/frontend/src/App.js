@@ -9,6 +9,8 @@ import IndicatorDetail from "@/pages/IndicatorDetail";
 import EAList from "@/pages/EAList";
 import IndicatorsList from "@/pages/IndicatorsList";
 import TutorialsList from "@/pages/TutorialsList";
+import ArticleList from "@/pages/ArticleList";
+import ArticleDetail from "@/pages/ArticleDetail";
 
 // Admin
 import AdminLayout from "@/admin/AdminLayout";
@@ -18,6 +20,7 @@ import SubmissionsManager from "@/admin/SubmissionsManager";
 import EAManager from "@/admin/EAManager";
 import IndicatorManager from "@/admin/IndicatorManager";
 import TutorialManager from "@/admin/TutorialManager";
+import ArticleManager from "@/admin/ArticleManager";
 
 import { Toaster } from "@/components/ui/sonner";
 import CustomCursor from "@/components/CustomCursor";
@@ -40,6 +43,7 @@ function App() {
               <Route path="eas" element={<EAManager />} />
               <Route path="indicators" element={<IndicatorManager />} />
               <Route path="tutorials" element={<TutorialManager />} />
+              <Route path="articles" element={<ArticleManager />} />
             </Route>
 
             {/* Sci-Fi (default) */}
@@ -49,6 +53,8 @@ function App() {
             <Route path="/indicators" element={<IndicatorsList />} />
             <Route path="/indicator/:id" element={<IndicatorDetail />} />
             <Route path="/tutorials" element={<TutorialsList />} />
+            <Route path="/articles" element={<ArticleList />} />
+            <Route path="/articles/:slug" element={<ArticleDetail />} />
 
             {/* Apple */}
             <Route path="/apple" element={<Apple />} />
@@ -57,6 +63,8 @@ function App() {
             <Route path="/apple/indicators" element={<IndicatorsList />} />
             <Route path="/apple/indicator/:id" element={<IndicatorDetail />} />
             <Route path="/apple/tutorials" element={<TutorialsList />} />
+            <Route path="/apple/articles" element={<ArticleList />} />
+            <Route path="/apple/articles/:slug" element={<ArticleDetail />} />
 
             {/* Hybrid */}
             <Route path="/hybrid" element={<Hybrid />} />
@@ -65,6 +73,8 @@ function App() {
             <Route path="/hybrid/indicators" element={<IndicatorsList />} />
             <Route path="/hybrid/indicator/:id" element={<IndicatorDetail />} />
             <Route path="/hybrid/tutorials" element={<TutorialsList />} />
+            <Route path="/hybrid/articles" element={<ArticleList />} />
+            <Route path="/hybrid/articles/:slug" element={<ArticleDetail />} />
           </Routes>
           <FloatingWechat />
           <Toaster position="top-center" theme="dark" />

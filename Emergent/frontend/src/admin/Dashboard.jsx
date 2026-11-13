@@ -1,41 +1,44 @@
 import React, { useEffect, useState } from "react";
 import api from "./api";
-import { MessageSquare, Settings2, BarChart2, BookOpen } from "lucide-react";
+import { MessageSquare, Settings2, BarChart2, BookOpen, FileText } from "lucide-react";
 
 export default function Dashboard() {
   const [stats, setStats] = useState({
-    submissions: 0,
-    eas: 0,
-    indicators: 0,
-    tutorials: 0,
+    submissions: null,
+    eas: null,
+    indicators: null,
+    tutorials: null,
+    articles: null,
   });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [subRes, eaRes, indRes, tutRes] = await Promise.all([
-          api.get("/submissions?limit=1"),
-          api.get("/eas?limit=1"),
-          api.get("/indicators?limit=1"),
-          api.get("/tutorials?limit=1"),
-        ]);
-        // Normally we'd want a count endpoint, but we can just use length if it's small, 
-        // or just show recent activity. For now, let's just assume we want the length of the lists.
-        // Actually, without a count endpoint, we just fetch all to get lengths for the dashboard.
-        const [subAll, eaAll, indAll, tutAll] = await Promise.all([
+        const results = await Promise.allSettled([
           api.get("/submissions?limit=1000"),
-          api.get("/eas?limit=1000"),
-          api.get("/indicators?limit=1000"),
-          api.get("/tutorials?limit=1000"),
+          api.get("/admin/eas?limit=1000"),
+          api.get("/admin/indicators?limit=1000"),
+          api.get("/admin/tutorials?limit=1000"),
+          api.get("/admin/articles?limit=1000"),
         ]);
 
+        const count = (result) =>
+          result.status === "fulfilled" && Array.isArray(result.value.data)
+            ? result.value.data.length
+            : null;
+
         setStats({
-          submissions: subAll.data.length,
-          eas: eaAll.data.length,
-          indicators: indAll.data.length,
-          tutorials: tutAll.data.length,
+          submissions: count(results[0]),
+          eas: count(results[1]),
+          indicators: count(results[2]),
+          tutorials: count(results[3]),
+          articles: count(results[4]),
         });
+
+        if (results.some((result) => result.status === "rejected")) {
+          console.error("Some dashboard statistics failed to load", results);
+        }
       } catch (err) {
         console.error("Failed to fetch stats", err);
       } finally {
@@ -50,6 +53,7 @@ export default function Dashboard() {
     { title: "EA 策略总数", value: stats.eas, icon: <Settings2 size={24} className="text-green-400" /> },
     { title: "技术指标总数", value: stats.indicators, icon: <BarChart2 size={24} className="text-purple-400" /> },
     { title: "视频教程总数", value: stats.tutorials, icon: <BookOpen size={24} className="text-yellow-400" /> },
+    { title: "文章与研究总数", value: stats.articles, icon: <FileText size={24} className="text-cyan-400" /> },
   ];
 
   if (loading) {
@@ -64,7 +68,9 @@ export default function Dashboard() {
           <div key={i} className="bg-neutral-800 p-6 rounded-2xl border border-neutral-700 flex items-center justify-between hover:border-neutral-600 transition-colors">
             <div>
               <p className="text-neutral-400 text-sm font-medium mb-2">{card.title}</p>
-              <h3 className="text-3xl font-bold text-white">{card.value}</h3>
+              <h3 className="text-3xl font-bold text-white">
+                {card.value === null ? "--" : card.value}
+              </h3>
             </div>
             <div className="bg-neutral-900 p-4 rounded-xl border border-neutral-800">
               {card.icon}

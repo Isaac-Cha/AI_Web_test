@@ -1,17 +1,30 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, useNavigate, Link, useLocation } from "react-router-dom";
-import { MessageSquare, LayoutDashboard, Settings2, BarChart2, BookOpen, LogOut } from "lucide-react";
+import { MessageSquare, LayoutDashboard, Settings2, BarChart2, BookOpen, FileText, LogOut } from "lucide-react";
 import { toast } from "sonner";
+import api from "./api";
 
 export default function AdminLayout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const [checkingAuth, setCheckingAuth] = useState(true);
 
   useEffect(() => {
     const token = localStorage.getItem("admin_token");
     if (!token) {
       navigate("/admin/login");
+      return;
     }
+
+    api
+      .get("/submissions?limit=1")
+      .then(() => setCheckingAuth(false))
+      .catch((error) => {
+        if (error.response?.status !== 401) {
+          toast.error("管理员身份验证失败，请检查后台服务");
+          setCheckingAuth(false);
+        }
+      });
   }, [navigate]);
 
   const handleLogout = () => {
@@ -26,7 +39,16 @@ export default function AdminLayout() {
     { path: "/admin/eas", icon: <Settings2 size={20} />, label: "EA 管理" },
     { path: "/admin/indicators", icon: <BarChart2 size={20} />, label: "指标管理" },
     { path: "/admin/tutorials", icon: <BookOpen size={20} />, label: "教程管理" },
+    { path: "/admin/articles", icon: <FileText size={20} />, label: "文章与研究" },
   ];
+
+  if (checkingAuth) {
+    return (
+      <div className="min-h-screen bg-neutral-900 flex items-center justify-center text-neutral-400">
+        正在验证管理员身份...
+      </div>
+    );
+  }
 
   return (
     <div className="flex h-screen bg-neutral-900 text-white font-sans">

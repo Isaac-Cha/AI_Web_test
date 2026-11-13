@@ -9,13 +9,6 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { API } from "@/lib/api";
 
-const TEAM = [
-  { name: "Alex Chen", role: "Head of Quant · 前投行交易员", tag: "Quant", color: "text-gold" },
-  { name: "Luna Wu", role: "EA Architect · C++/MQL5", tag: "Engineering", color: "text-cyan2" },
-  { name: "Ken Zhao", role: "Risk & Execution", tag: "Risk", color: "text-emerald-400" },
-  { name: "Iris Lin", role: "Growth · Baidu & AI Search", tag: "Growth", color: "text-pink-300" },
-];
-
 const benefitIcons = [Rocket, LineChart, Users, Server];
 
 export default function AboutJoin() {
@@ -82,31 +75,6 @@ export default function AboutJoin() {
           </div>
         </div>
 
-        {/* Team */}
-        <div className="mb-16">
-          <div className="font-display text-xl font-semibold mb-6">{t.about.teamTitle}</div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {TEAM.map((m, i) => (
-              <motion.div
-                key={m.name}
-                initial={{ opacity: 0, scale: 0.96 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                viewport={{ once: false, margin: "-60px" }}
-                transition={{ duration: 0.5, delay: i * 0.06 }}
-                className="glass rounded-2xl p-6 ring-cyan-hover transition-all"
-                data-testid={`team-member-${i}`}
-              >
-                <div className="w-14 h-14 rounded-full bg-gradient-to-br from-gold-300 to-gold-700 flex items-center justify-center font-display font-black text-black text-xl mb-4">
-                  {m.name.split(" ").map((p) => p[0]).join("").slice(0, 2)}
-                </div>
-                <div className={`font-mono text-[10px] tracking-widest uppercase ${m.color}`}>{m.tag}</div>
-                <div className="font-display text-base font-bold mt-1">{m.name}</div>
-                <div className="text-xs text-gray-400 mt-1 leading-relaxed">{m.role}</div>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-
         {/* Form */}
         <div className="grid lg:grid-cols-12 gap-8">
           <div className="lg:col-span-5">
@@ -116,7 +84,7 @@ export default function AboutJoin() {
                 {t.about.subtitle}
               </p>
               <div className="mt-6 space-y-3">
-                {["EA 开发者合作 · EA Developer", "资金方合作 · Capital Partner", "平台销售合作 · Broker Sales"].map((s) => (
+                {["EA 研究与开发 · EA Research", "指标验证 · Indicator Review", "交易系统技术交流 · System Design"].map((s) => (
                   <div key={s} className="flex items-center gap-2 text-sm text-gray-300">
                     <span className="w-1.5 h-1.5 rounded-full bg-cyan2" /> {s}
                   </div>

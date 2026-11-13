@@ -4,7 +4,8 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Globe, Menu, X } from "lucide-react";
-import VersionSwitcher from "@/components/VersionSwitcher";
+import { Link } from "react-router-dom";
+import VersionSwitcher, { useHref } from "@/components/VersionSwitcher";
 
 const NAV_ITEMS = [
   { id: "home", href: "#home" },
@@ -17,6 +18,7 @@ const NAV_ITEMS = [
 
 export default function Header() {
   const { lang, setLang, t } = useLang();
+  const href = useHref();
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -67,6 +69,9 @@ export default function Header() {
               <span className="absolute left-0 -bottom-1 h-px w-0 bg-cyan2 transition-all group-hover:w-full" />
             </button>
           ))}
+          <Link to={href("/articles")} className="text-sm text-gray-300 hover:text-white transition-colors">
+            {lang === "zh" ? "内容库" : "Knowledge"}
+          </Link>
         </nav>
 
         <div className="flex items-center gap-2 md:gap-3">
@@ -121,6 +126,9 @@ export default function Header() {
                 {t.nav[it.id]}
               </button>
             ))}
+            <Link onClick={() => setMobileOpen(false)} to={href("/articles")} className="text-left text-gray-200 py-1.5 border-b border-white/5">
+              {lang === "zh" ? "内容库" : "Knowledge"}
+            </Link>
           </div>
         </div>
       )}

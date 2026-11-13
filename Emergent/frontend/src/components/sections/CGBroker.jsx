@@ -21,7 +21,7 @@ export default function CGBroker() {
           </div>
           <div className="glass rounded-xl px-5 py-3 flex items-center gap-3" data-testid="broker-logo-chip">
             <img src="/img/logo-CG.png" alt="CG" className="h-8" onError={(e)=>{e.currentTarget.style.display='none';}} />
-            <span className="font-mono text-xs tracking-[0.2em] text-cyan2">PARTNER · LIVE</span>
+            <span className="font-mono text-xs tracking-[0.2em] text-cyan2">PLATFORM · INFO</span>
           </div>
         </div>
 
@@ -56,7 +56,7 @@ export default function CGBroker() {
               })}
               <div className="glass rounded-2xl p-6 sm:col-span-2 bg-gradient-to-br from-gold/5 to-cyan2/5" data-testid="broker-benefits-summary">
                 <div className="section-label mb-2">WHY CG</div>
-                <div className="font-display text-xl font-semibold">低延迟 · 深度流动性 · 稳定点差 · 全天候风控</div>
+                <div className="font-display text-xl font-semibold">监管实体 · 费用结构 · 执行条件 · 风险披露</div>
               </div>
             </div>
 

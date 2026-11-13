@@ -12,6 +12,7 @@ import {
 import { useLang } from "@/context/LanguageContext";
 import VersionSwitcher, { useVariant, useHref } from "@/components/VersionSwitcher";
 import WechatQrModal from "@/components/WechatQrModal";
+import EvidencePanel from "@/components/EvidencePanel";
 import { API } from "@/lib/api";
 
 const sf = "-apple-system, BlinkMacSystemFont, 'SF Pro Display', 'SF Pro Text', 'Helvetica Neue', 'PingFang SC', 'Microsoft YaHei', Arial, sans-serif";
@@ -217,9 +218,12 @@ export default function EADetail() {
 
     const availablePlatforms = hasAccounts ? [...new Set(ea.accounts.map(a => a.platform || "MT4"))] : [];
 
+    const closedDrawdown = ea.closed_drawdown || (hasAccounts && currentStats.max_drawdown !== undefined ? `${currentStats.max_drawdown}%` : "待补充");
+    const floatingDrawdown = ea.floating_drawdown || "待补充";
     const stats = [
       { icon: TrendingUp, label: t.ea.col.profit, value: currentStats.profit_monthly || ea.profit_monthly, tone: isApple ? "text-[#0071E3]" : "text-gold" },
-      { icon: AlertTriangle, label: t.ea.col.dd, value: hasAccounts && currentStats.max_drawdown !== undefined ? `${currentStats.max_drawdown}%` : ea.max_drawdown, tone: isApple ? "text-rose-600" : "text-red-400" },
+      { icon: AlertTriangle, label: lang === "zh" ? "已平仓最大回撤" : "Closed drawdown", value: closedDrawdown, tone: isApple ? "text-amber-600" : "text-amber-400" },
+      { icon: AlertTriangle, label: lang === "zh" ? "最大浮动回撤" : "Floating drawdown", value: floatingDrawdown, tone: isApple ? "text-rose-600" : "text-red-400" },
       { icon: Shield, label: t.ea.col.risk, value: ea.risk_level, tone: isApple ? "text-emerald-600" : "text-emerald-400" },
       { icon: Wallet, label: t.ea.col.minCap, value: hasAccounts && currentStats.initial_deposit !== undefined ? `$${currentStats.initial_deposit}` : ea.min_capital, tone: isApple ? "text-[#0071E3]" : "text-cyan2" },
     ];
@@ -288,7 +292,7 @@ export default function EADetail() {
 
       {/* Stats row */}
       <section className="max-w-7xl mx-auto px-6 md:px-10 -mt-10 relative z-10">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
           {stats.map((s, i) => (
             <motion.div
               key={s.label}
@@ -427,7 +431,7 @@ export default function EADetail() {
               <h2 className="font-display text-xl md:text-2xl font-bold mt-1">{t.ea.detailEquity}</h2>
             </div>
             <div className={`font-mono text-xs flex items-center gap-1.5 ${isApple ? "text-emerald-600" : "text-emerald-400"}`}>
-              <span className={`w-1.5 h-1.5 rounded-full animate-pulse ${isApple ? "bg-emerald-600" : "bg-emerald-400"}`} /> LIVE
+              <span className={`w-1.5 h-1.5 rounded-full ${isApple ? "bg-emerald-600" : "bg-emerald-400"}`} /> {lang === "zh" ? "历史记录" : "RECORDED"}
             </div>
           </div>
           <AnimatedEquity equity={ea.equity} isApple={isApple} loadingLabel={lang === "zh" ? "加载权益曲线…" : "Loading equity…"} />
@@ -471,6 +475,8 @@ export default function EADetail() {
           </motion.div>
         </div>
       </section>
+
+      <EvidencePanel item={ea} isApple={isApple} lang={lang} />
 
       {/* Setup + CTA */}
       <section className="max-w-7xl mx-auto px-6 md:px-10 pb-24">

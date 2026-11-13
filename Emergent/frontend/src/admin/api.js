@@ -15,4 +15,22 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (
+      error.response?.status === 401 &&
+      window.location.pathname !== "/admin/login"
+    ) {
+      localStorage.removeItem("admin_token");
+      sessionStorage.setItem(
+        "admin_auth_notice",
+        "管理员凭据已失效，请使用当前服务器的 ADMIN_TOKEN 重新登录"
+      );
+      window.location.assign("/admin/login");
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;

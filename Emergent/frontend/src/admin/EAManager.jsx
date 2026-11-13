@@ -80,7 +80,7 @@ export default function EAManager() {
 
   const fetchEAs = async () => {
     try {
-      const res = await api.get("/eas?limit=500&include_draft=true");
+      const res = await api.get("/admin/eas?limit=500");
       setEas(res.data);
     } catch (err) {
       toast.error("获取EA列表失败");

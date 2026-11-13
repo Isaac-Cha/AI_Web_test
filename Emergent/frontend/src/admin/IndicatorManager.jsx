@@ -72,7 +72,7 @@ export default function IndicatorManager() {
 
   const fetchIndicators = async () => {
     try {
-      const res = await api.get("/indicators?limit=500&include_draft=true");
+      const res = await api.get("/admin/indicators?limit=500");
       setIndicators(res.data);
     } catch (err) {
       toast.error("获取指标列表失败");
@@ -88,7 +88,13 @@ export default function IndicatorManager() {
       toast.success("删除成功");
       fetchIndicators();
     } catch (err) {
-      toast.error("删除失败");
+      const status = err.response?.status;
+      const detail = err.response?.data?.detail;
+      toast.error(
+        status === 401
+          ? "删除失败：管理员凭据已失效，请重新登录"
+          : `删除失败${status ? `（HTTP ${status}）` : ""}${detail ? `：${detail}` : ""}`
+      );
     }
   };
 

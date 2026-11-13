@@ -47,7 +47,7 @@ export default function TutorialManager() {
 
   const fetchTutorials = async () => {
     try {
-      const res = await api.get("/tutorials?limit=500&include_draft=true");
+      const res = await api.get("/admin/tutorials?limit=500");
       setTutorials(res.data);
     } catch (err) {
       toast.error("获取教程列表失败");
