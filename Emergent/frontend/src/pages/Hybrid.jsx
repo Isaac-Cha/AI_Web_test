@@ -373,6 +373,7 @@ function HybridTutorials() {
   useEffect(() => {
     axios.get(`${API}/tutorials`).then((r) => setItems(r.data)).catch(() => {});
   }, []);
+  if (items.length === 0) return null;
   return (
     <section id="tutorials" className="max-w-[1024px] mx-auto px-5 mt-4">
       <div className="text-center my-12" style={{ fontFamily: sf }}>

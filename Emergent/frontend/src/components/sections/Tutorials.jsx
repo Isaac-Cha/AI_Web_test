@@ -16,6 +16,8 @@ export default function Tutorials() {
     axios.get(`${API}/tutorials`).then((r) => setItems(r.data)).catch(() => {});
   }, []);
 
+  if (items.length === 0) return null;
+
   return (
     <section id="tutorials" data-testid="tutorials-section" className="relative py-24 md:py-32 bg-obsidian-800/60">
       <div className="max-w-7xl mx-auto px-6 md:px-10">
