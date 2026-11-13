@@ -60,7 +60,8 @@
   },
   "scripts": {
     "start": "craco start",
-    "build": "craco build",
+    "build": "craco build && node scripts/harden-build.cjs",
+    "test:security-policy": "node --test scripts/harden-build.test.cjs",
     "test": "craco test"
   },
   "browserslist": {

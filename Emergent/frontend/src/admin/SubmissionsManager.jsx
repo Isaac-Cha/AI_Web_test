@@ -4,6 +4,8 @@ import { format } from "date-fns";
 import { Eye, X } from "lucide-react";
 
 export default function SubmissionsManager() {
+  // Untrusted historical records must stay React text children in BOTH views.
+  // Never decode entities, auto-link, or render these fields as HTML.
   const [submissions, setSubmissions] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
