@@ -86,7 +86,76 @@ class EAAccountStats(BaseModel):
     profit_by_month: Optional[dict] = None
     last_sync_time: str
 
-class EAIn(BaseModel):
+
+VerificationStatus = Literal[
+    "inbox",
+    "screened",
+    "testable",
+    "testing",
+    "reviewed",
+    "approved",
+    "rejected",
+    "archived",
+]
+
+OwnershipType = Literal[
+    "self_owned",
+    "collected",
+    "open_source",
+    "independent_reimplementation",
+]
+
+
+class Reference(BaseModel):
+    title: str
+    url: Optional[str] = None
+    note: Optional[str] = None
+
+
+class VersionNote(BaseModel):
+    version: str
+    date: Optional[str] = None
+    note: str
+
+
+class MediaAsset(BaseModel):
+    url: str
+    kind: Literal["cover", "product_screenshot", "report_chart", "diagram", "source_image"]
+    title: Optional[str] = None
+    source: Literal["real", "test_data", "ai_generated", "third_party"]
+    captured_at: Optional[datetime] = None
+    evidence_ref: Optional[str] = None
+
+
+class ClaimEvidence(BaseModel):
+    claim_key: str
+    display_value: str
+    evidence_ref: str
+    status: Literal["pending", "verified"] = "pending"
+    note: Optional[str] = None
+
+
+class EvidenceFields(BaseModel):
+    verification_status: VerificationStatus = "inbox"
+    ownership_type: OwnershipType = "collected"
+    version: Optional[str] = None
+    platform_versions: List[str] = Field(default_factory=list)
+    source_refs: List[Reference] = Field(default_factory=list)
+    evidence_refs: List[Reference] = Field(default_factory=list)
+    screenshots: List[str] = Field(default_factory=list)
+    media_assets: List[MediaAsset] = Field(default_factory=list)
+    claim_evidence: List[ClaimEvidence] = Field(default_factory=list)
+    test_period: Optional[str] = None
+    test_environment: Optional[str] = None
+    offline_test_completed: bool = False
+    limitations: List[str] = Field(default_factory=list)
+    risk_notes: List[str] = Field(default_factory=list)
+    research_id: Optional[str] = None
+    version_history: List[VersionNote] = Field(default_factory=list)
+    published_at: Optional[datetime] = None
+
+
+class EAIn(EvidenceFields):
     model_config = ConfigDict(extra="ignore")
     id: str
     sort: int = 1000
@@ -121,6 +190,14 @@ class EAIn(BaseModel):
     profit_by_week: Optional[dict] = None
     profit_by_month: Optional[dict] = None
     last_sync_time: Optional[str] = None
+    initial_capital: Optional[str] = None
+    account_type: Optional[str] = None
+    closed_drawdown: Optional[str] = None
+    floating_drawdown: Optional[str] = None
+    margin_usage: Optional[str] = None
+    parameter_version: Optional[str] = None
+    risk_triggers: Optional[str] = None
+    data_source: Optional[str] = None
     # Support multiple trading accounts per EA
     accounts: Optional[List[EAAccountStats]] = Field(default_factory=list)
 
@@ -130,7 +207,7 @@ class EAOut(EAIn):
     updated_at: datetime
 
 
-class IndicatorIn(BaseModel):
+class IndicatorIn(EvidenceFields):
     model_config = ConfigDict(extra="ignore")
     id: str
     sort: int = 1000
@@ -142,7 +219,6 @@ class IndicatorIn(BaseModel):
     desc_zh: str
     desc_en: str
     cover: Optional[str] = None
-    screenshots: Optional[List[str]] = None
     source_url: Optional[str] = None
     usage_zh: Optional[str] = None
     usage_en: Optional[str] = None
@@ -169,6 +245,50 @@ class TutorialIn(BaseModel):
 
 
 class TutorialOut(TutorialIn):
+    created_at: datetime
+    updated_at: datetime
+
+
+class ArticleIn(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    slug: str = Field(pattern=r"^[a-z0-9]+(?:-[a-z0-9]+)*$")
+    title: str
+    summary: str
+    content: str
+    type: Literal["foundation", "system", "research", "guide", "case"]
+    source_refs: List[Reference] = Field(default_factory=list)
+    related_eas: List[str] = Field(default_factory=list)
+    related_indicators: List[str] = Field(default_factory=list)
+    research_id: Optional[str] = None
+    status: Literal["draft", "reviewed", "published", "archived"] = "draft"
+    cover: Optional[str] = None
+    published_at: Optional[datetime] = None
+
+
+class ArticleOut(ArticleIn):
+    created_at: datetime
+    updated_at: datetime
+
+
+class ResearchPublicIn(BaseModel):
+    model_config = ConfigDict(extra="ignore")
+    id: str = Field(pattern=r"^RES-[0-9]{4}-[0-9]{3,}$")
+    title: str
+    summary: str
+    subject_type: Literal["ea", "indicator", "system", "tool"]
+    subject_id: Optional[str] = None
+    verification_status: VerificationStatus = "reviewed"
+    test_period: Optional[str] = None
+    test_environment: Optional[str] = None
+    findings: List[str] = Field(default_factory=list)
+    limitations: List[str] = Field(default_factory=list)
+    source_refs: List[Reference] = Field(default_factory=list)
+    evidence_refs: List[Reference] = Field(default_factory=list)
+    status: Literal["draft", "published", "archived"] = "draft"
+    published_at: Optional[datetime] = None
+
+
+class ResearchPublicOut(ResearchPublicIn):
     created_at: datetime
     updated_at: datetime
 
@@ -208,9 +328,9 @@ class OrderIn(BaseModel):
 
 def _normalize_dt(doc: dict) -> dict:
     now = datetime.now(timezone.utc)
-    for k in ("created_at", "updated_at"):
+    for k in ("created_at", "updated_at", "published_at"):
         v = doc.get(k)
-        if v is None:
+        if v is None and k in ("created_at", "updated_at"):
             doc[k] = now
             continue
         if isinstance(v, str):
@@ -229,9 +349,13 @@ async def _ensure_indexes() -> None:
     await db.tutorials.create_index("id", unique=True)
     await db.uploads.create_index("id", unique=True)
     await db.uploads.create_index("key", unique=True)
+    await db.articles.create_index("slug", unique=True)
+    await db.public_research.create_index("id", unique=True)
     await db.eas.create_index("sort")
     await db.indicators.create_index("sort")
     await db.tutorials.create_index("sort")
+    await db.articles.create_index([("status", 1), ("published_at", -1)])
+    await db.public_research.create_index([("status", 1), ("published_at", -1)])
     await db.ticks_xauusd.create_index("ts")
     await db.account_orders.create_index([("account_id", 1), ("ticket", 1)], unique=True)
 
@@ -268,21 +392,24 @@ async def list_submissions(
 
 
 @api_router.get("/eas", response_model=List[EAOut])
-async def list_eas(include_draft: bool = False, limit: int = 200):
-    query: dict[str, Any] = {}
-    if not include_draft:
-        query["status"] = "published"
-    cursor = db.eas.find(query, {"_id": 0}).sort("sort", 1).limit(limit)
+async def list_eas(limit: int = 200):
+    cursor = db.eas.find({"status": "published"}, {"_id": 0}).sort("sort", 1).limit(limit)
     rows = await cursor.to_list(limit)
     return [_normalize_dt(r) for r in rows]
 
 
 @api_router.get("/eas/{ea_id}", response_model=EAOut)
 async def get_ea(ea_id: str):
-    doc = await db.eas.find_one({"id": ea_id}, {"_id": 0})
+    doc = await db.eas.find_one({"id": ea_id, "status": "published"}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="EA not found")
     return _normalize_dt(doc)
+
+
+@api_router.get("/admin/eas", response_model=List[EAOut], dependencies=[Depends(require_admin)])
+async def admin_list_eas(limit: int = 500):
+    rows = await db.eas.find({}, {"_id": 0}).sort("sort", 1).limit(limit).to_list(limit)
+    return [_normalize_dt(r) for r in rows]
 
 
 @api_router.post("/admin/eas", response_model=EAOut, dependencies=[Depends(require_admin)])
@@ -322,21 +449,24 @@ async def admin_delete_ea(ea_id: str):
 
 
 @api_router.get("/indicators", response_model=List[IndicatorOut])
-async def list_indicators(include_draft: bool = False, limit: int = 200):
-    query: dict[str, Any] = {}
-    if not include_draft:
-        query["status"] = "published"
-    cursor = db.indicators.find(query, {"_id": 0}).sort("sort", 1).limit(limit)
+async def list_indicators(limit: int = 200):
+    cursor = db.indicators.find({"status": "published"}, {"_id": 0}).sort("sort", 1).limit(limit)
     rows = await cursor.to_list(limit)
     return [_normalize_dt(r) for r in rows]
 
 
 @api_router.get("/indicators/{ind_id}", response_model=IndicatorOut)
 async def get_indicator(ind_id: str):
-    doc = await db.indicators.find_one({"id": ind_id}, {"_id": 0})
+    doc = await db.indicators.find_one({"id": ind_id, "status": "published"}, {"_id": 0})
     if not doc:
         raise HTTPException(status_code=404, detail="Indicator not found")
     return _normalize_dt(doc)
+
+
+@api_router.get("/admin/indicators", response_model=List[IndicatorOut], dependencies=[Depends(require_admin)])
+async def admin_list_indicators(limit: int = 500):
+    rows = await db.indicators.find({}, {"_id": 0}).sort("sort", 1).limit(limit).to_list(limit)
+    return [_normalize_dt(r) for r in rows]
 
 
 @api_router.post("/admin/indicators", response_model=IndicatorOut, dependencies=[Depends(require_admin)])
@@ -376,12 +506,15 @@ async def admin_delete_indicator(ind_id: str):
 
 
 @api_router.get("/tutorials", response_model=List[TutorialOut])
-async def list_tutorials(include_draft: bool = False, limit: int = 200):
-    query: dict[str, Any] = {}
-    if not include_draft:
-        query["status"] = "published"
-    cursor = db.tutorials.find(query, {"_id": 0}).sort("sort", 1).limit(limit)
+async def list_tutorials(limit: int = 200):
+    cursor = db.tutorials.find({"status": "published"}, {"_id": 0}).sort("sort", 1).limit(limit)
     rows = await cursor.to_list(limit)
+    return [_normalize_dt(r) for r in rows]
+
+
+@api_router.get("/admin/tutorials", response_model=List[TutorialOut], dependencies=[Depends(require_admin)])
+async def admin_list_tutorials(limit: int = 500):
+    rows = await db.tutorials.find({}, {"_id": 0}).sort("sort", 1).limit(limit).to_list(limit)
     return [_normalize_dt(r) for r in rows]
 
 
@@ -418,6 +551,94 @@ async def admin_update_tutorial(t_id: str, payload: TutorialIn):
 @api_router.delete("/admin/tutorials/{t_id}", dependencies=[Depends(require_admin)])
 async def admin_delete_tutorial(t_id: str):
     await db.tutorials.delete_one({"id": t_id})
+    return {"ok": True}
+
+
+@api_router.get("/articles", response_model=List[ArticleOut])
+async def list_articles(article_type: Optional[str] = None, limit: int = 100):
+    query: dict[str, Any] = {"status": "published"}
+    if article_type:
+        query["type"] = article_type
+    cursor = db.articles.find(query, {"_id": 0}).sort("published_at", -1).limit(limit)
+    rows = await cursor.to_list(limit)
+    return [_normalize_dt(r) for r in rows]
+
+
+@api_router.get("/articles/{slug}", response_model=ArticleOut)
+async def get_article(slug: str):
+    doc = await db.articles.find_one({"slug": slug, "status": "published"}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Article not found")
+    return _normalize_dt(doc)
+
+
+@api_router.get("/admin/articles", response_model=List[ArticleOut], dependencies=[Depends(require_admin)])
+async def admin_list_articles(limit: int = 500):
+    rows = await db.articles.find({}, {"_id": 0}).sort("updated_at", -1).limit(limit).to_list(limit)
+    return [_normalize_dt(r) for r in rows]
+
+
+@api_router.put("/admin/articles/{slug}", response_model=ArticleOut, dependencies=[Depends(require_admin)])
+async def admin_upsert_article(slug: str, payload: ArticleIn):
+    if slug != payload.slug:
+        raise HTTPException(status_code=400, detail="slug does not match payload")
+    now = datetime.now(timezone.utc)
+    existing = await db.articles.find_one({"slug": slug})
+    doc = payload.model_dump(mode="json")
+    doc["created_at"] = existing.get("created_at") if existing else now.isoformat()
+    doc["updated_at"] = now.isoformat()
+    if payload.status == "published" and not doc.get("published_at"):
+        doc["published_at"] = now.isoformat()
+    await db.articles.update_one({"slug": slug}, {"$set": doc}, upsert=True)
+    saved = await db.articles.find_one({"slug": slug}, {"_id": 0})
+    return _normalize_dt(saved)
+
+
+@api_router.delete("/admin/articles/{slug}", dependencies=[Depends(require_admin)])
+async def admin_delete_article(slug: str):
+    await db.articles.delete_one({"slug": slug})
+    return {"ok": True}
+
+
+@api_router.get("/research", response_model=List[ResearchPublicOut])
+async def list_public_research(limit: int = 100):
+    rows = await db.public_research.find({"status": "published"}, {"_id": 0}).sort("published_at", -1).limit(limit).to_list(limit)
+    return [_normalize_dt(r) for r in rows]
+
+
+@api_router.get("/research/{research_id}", response_model=ResearchPublicOut)
+async def get_public_research(research_id: str):
+    doc = await db.public_research.find_one({"id": research_id, "status": "published"}, {"_id": 0})
+    if not doc:
+        raise HTTPException(status_code=404, detail="Research not found")
+    return _normalize_dt(doc)
+
+
+@api_router.get("/admin/research", response_model=List[ResearchPublicOut], dependencies=[Depends(require_admin)])
+async def admin_list_research(limit: int = 500):
+    rows = await db.public_research.find({}, {"_id": 0}).sort("updated_at", -1).limit(limit).to_list(limit)
+    return [_normalize_dt(r) for r in rows]
+
+
+@api_router.put("/admin/research/{research_id}", response_model=ResearchPublicOut, dependencies=[Depends(require_admin)])
+async def admin_upsert_research(research_id: str, payload: ResearchPublicIn):
+    if research_id != payload.id:
+        raise HTTPException(status_code=400, detail="research id does not match payload")
+    now = datetime.now(timezone.utc)
+    existing = await db.public_research.find_one({"id": research_id})
+    doc = payload.model_dump(mode="json")
+    doc["created_at"] = existing.get("created_at") if existing else now.isoformat()
+    doc["updated_at"] = now.isoformat()
+    if payload.status == "published" and not doc.get("published_at"):
+        doc["published_at"] = now.isoformat()
+    await db.public_research.update_one({"id": research_id}, {"$set": doc}, upsert=True)
+    saved = await db.public_research.find_one({"id": research_id}, {"_id": 0})
+    return _normalize_dt(saved)
+
+
+@api_router.delete("/admin/research/{research_id}", dependencies=[Depends(require_admin)])
+async def admin_delete_research(research_id: str):
+    await db.public_research.delete_one({"id": research_id})
     return {"ok": True}
 
 

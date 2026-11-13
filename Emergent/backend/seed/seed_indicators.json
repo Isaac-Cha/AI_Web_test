@@ -1,60 +1,58 @@
 [
   {
-    "id": "ind-liquidity-map",
+    "id": "ind-tianyan-1",
     "sort": 10,
     "status": "published",
-    "name_zh": "流动性地图",
-    "name_en": "Liquidity Map",
-    "category_zh": "工具面板",
-    "category_en": "Tools",
-    "desc_zh": "显示潜在流动性聚集区，辅助更精确的入场与止损布置。",
-    "desc_en": "Highlights liquidity clusters for more precise entries and risk placement.",
-    "cover": "https://images.unsplash.com/photo-1642790551116-18e150f248e3?auto=format&fit=crop&w=1600&q=70",
-    "usage_zh": "安装后在任意图表启用，通过参数调节阈值与显示范围。建议与结构分析搭配。",
-    "usage_en": "Enable on any chart and tune thresholds/range. Use alongside structure analysis.",
-    "features_zh": ["多时间框架聚合", "阈值自适应", "区域高亮可配置"],
-    "features_en": ["Multi-timeframe aggregation", "Adaptive threshold", "Configurable highlights"]
-  },
-  {
-    "id": "ind-session-clock",
-    "sort": 20,
-    "status": "published",
-    "name_zh": "交易时段时钟",
-    "name_en": "Session Clock",
-    "category_zh": "工具面板",
-    "category_en": "Tools",
-    "desc_zh": "伦敦/纽约/亚洲 session 重叠可视化，帮助选择更有效的交易窗口。",
-    "desc_en": "Visualizes London/NY/Asia sessions and overlaps for better timing.",
-    "cover": "https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&w=1600&q=70",
-    "usage_zh": "在图表角落显示当前时段状态与剩余时间，可自定义时区。",
-    "usage_en": "Shows current session and countdown; timezone configurable.",
-    "features_zh": ["三大时段自动识别", "交叠时段高亮", "倒计时提示"],
-    "features_en": ["Auto session detection", "Overlap highlighting", "Countdown"]
-  },
-  {
-    "id": "ind-tianyan-1",
-    "sort": 30,
-    "status": "published",
+    "verification_status": "reviewed",
+    "ownership_type": "collected",
+    "version": null,
+    "platform_versions": [],
+    "source_refs": [
+      {
+        "title": "EAHub 原始论坛帖",
+        "url": "https://www.eahub.cn/thread-70924-1-1.html",
+        "note": "原作者宣称命中率 95%+；该说法仅代表来源观点，不是本站测试结论。"
+      }
+    ],
+    "evidence_refs": [
+      {
+        "title": "天眼一号线下测试档案",
+        "note": "线下测试已完成；文件哈希、平台版本、品种周期、参数、日期与实际截图待录入。"
+      }
+    ],
+    "screenshots": [],
+    "media_assets": [
+      {
+        "url": "https://www.eahub.cn/data/attachment/forum/202303/29/185037p39lwwvim43mxw39.png",
+        "kind": "source_image",
+        "title": "来源帖示例图",
+        "source": "third_party",
+        "evidence_ref": "EAHub 原始论坛帖"
+      }
+    ],
+    "offline_test_completed": true,
+    "test_period": null,
+    "test_environment": null,
+    "limitations": [
+      "公开档案尚未补齐测试区间、参数和平台版本，因此不展示命中率或收益率。",
+      "趋势提示工具在震荡和快速反转环境中可能产生连续无效信号。"
+    ],
+    "risk_notes": [
+      "信号是否重绘、是否必须收线确认，应以保留的逐根 K 线测试记录为准。",
+      "指标仅用于辅助判断，不能替代仓位、止损和总风险控制。"
+    ],
+    "research_id": "RES-2026-001",
     "name_zh": "天眼一号",
     "name_en": "Tianyan No.1",
     "category_zh": "趋势系统",
     "category_en": "Trend System",
-    "desc_zh": "基于均线思路的趋势提示系统（来源帖作者宣称命中率 95%+，需自行验证）。",
-    "desc_en": "A trend-following signal system based on MA concepts (author claims 95%+ accuracy; verify independently).",
+    "desc_zh": "已完成线下测试的趋势提示工具。当前页面只公开可追溯的使用逻辑、限制和风险，不采用来源帖的命中率宣传作为本站结论。",
+    "desc_en": "An offline-reviewed trend signal tool. This page only publishes traceable usage logic, limitations and risks; the source author's accuracy claim is not treated as our finding.",
     "cover": "https://coreva-normal.trae.ai/api/ide/v1/text_to_image?prompt=Tianyan%20No.1%20trend%20signal%20system%20poster%2C%20dark%20obsidian%20background%2C%20gold%20and%20cyan%20accents%2C%20abstract%20candlestick%20chart%2C%20moving%20average%20ribbons%2C%20eye%20motif%2C%20clean%20modern%20typography%2C%20high%20contrast%2C%20minimal&image_size=landscape_16_9",
-    "usage_zh": "主图：紫色双轨之上只做多、天蓝双轨之下只做空；信号与变色以收线后确认。副图：多空方向与K线走势提示；作者建议黄金 15 分钟周期。",
-    "usage_en": "Main: long above purple bands, short below blue bands; confirm after candle close. Sub: trend direction and oscillator hints; author suggests XAUUSD M15.",
-    "features_zh": ["收线确认（不飘不移）", "减少频繁交易倾向", "趋势跟随，避免摸顶抄底"],
-    "features_en": ["Close-confirmed signals", "Discourages over-trading", "Trend-following, avoids catching tops/bottoms"],
-    "screenshots": [
-      "https://www.eahub.cn/data/attachment/forum/202303/29/185037p39lwwvim43mxw39.png",
-      "https://www.eahub.cn/data/attachment/forum/202303/29/185226yo6do91m06l6uxbn.png",
-      "https://www.eahub.cn/data/attachment/forum/202303/29/185256s44t8u5e5txo4oj8.png",
-      "https://www.eahub.cn/data/attachment/forum/202303/29/185328jbj1vjse1g120jhf.png",
-      "https://www.eahub.cn/data/attachment/forum/202303/29/185351gaczkmkzihehcsq6.png",
-      "https://www.eahub.cn/data/attachment/forum/202303/29/185516p761jamsaro6bsp7.png",
-      "https://www.eahub.cn/data/attachment/forum/202303/29/192434rsbvhiapxig0sa9z.png"
-    ],
-    "source_url": "https://www.eahub.cn/thread-70924-1-1.html"
+    "source_url": "https://www.eahub.cn/thread-70924-1-1.html",
+    "usage_zh": "主图用于观察价格与趋势带的相对位置；任何信号均以收线后状态为准。建议先在模拟环境核对参数和重绘行为，再纳入个人交易系统。",
+    "usage_en": "Use the main chart to observe price relative to the trend bands and confirm signals only after candle close. Validate parameters and repainting behavior in a demo environment before use.",
+    "features_zh": ["趋势方向可视化", "强调收线确认", "用于减少逆势猜顶抄底"],
+    "features_en": ["Trend direction visualization", "Candle-close confirmation", "Discourages counter-trend guessing"]
   }
 ]

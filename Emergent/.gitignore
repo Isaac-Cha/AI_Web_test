@@ -119,3 +119,13 @@ memory/*.xlsx
 
 # Tick downloader local output
 tools/tick_desktop/download/
+
+# Local production backups and control-center state
+backend/backups/
+control-center/data/
+control-center/ResearchInbox/
+control-center/ContentPackages/
+.tools/
+**/bin/
+**/obj/
+control-center/wwwroot/lib/
